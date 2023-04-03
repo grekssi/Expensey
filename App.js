@@ -7,6 +7,8 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import { TailwindProvider } from 'tailwindcss-react-native';
 import ImagePickerScreen from './screens/ImagePickerScreen';
+import ImagesScreen from './screens/ImagesScreen';
+import ImageUploadedScreen from './screens/ImageUploadedScreen';
 
 const Stack = createStackNavigator();
 const globalScreenOptions = {
@@ -20,8 +22,12 @@ export default function App() {
     <NavigationContainer>
       <TailwindProvider>
         <Stack.Navigator screenOptions={globalScreenOptions}>
-          <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="ImageUploaded" component={ImageUploadedScreen} options={{ presentation: "fullScreenModal", headerShown: false }}/>
+
+        <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="ImagePicker" component={ImagePickerScreen} />
+
+          <Stack.Screen name="Images" component={ImagesScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="Home" component={HomeScreen} />
         </Stack.Navigator>

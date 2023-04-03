@@ -46,25 +46,19 @@ const ImagePickerScreen = ({ navigation }) => {
         });
 
         if (!result.canceled) {
-            // Upload the image to Firebase Storage
-            // uploadImageToFirebase(result.assets[0].uri);
             setPickedImage(result.assets[0].uri);
             console.log(pickedImage);
         }
     };
 
-    const uploadImageToFirebase = async (uri) => {
+    const uploadImageToFirebase = async () => {
         try {
-            if(pickedImage === null){
-                return;
-            }   
-
-            const response = await fetch(uri);
+            const response = await fetch(pickedImage);
             const blob = await response.blob();
-            const filename = `${auth?.currentUser.displayName}:${date.getMonth()}:${date.getFullYear()}:${enteredNumber}` + '.jpg'; // You can customize the file name here
+            console.log("kur")
+            const filename = `${auth?.currentUser.email}:${date.getMonth()}:${date.getFullYear()}:${enteredNumber}` + '.jpg'; // You can customize the file name here
             const storageRef = ref(storage, `images/${filename}`);
             const uploadTask = uploadBytesResumable(storageRef, blob);
-            console.log("kur1")
             uploadTask.on(
                 'state_changed',
                 (snapshot) => {
@@ -74,9 +68,7 @@ const ImagePickerScreen = ({ navigation }) => {
                     console.error('Error uploading image:', error);
                 },
                 async () => {
-                    // Get the download URL of the uploaded image
-                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    console.log('File available at:', downloadURL);
+                    navigation.navigate("ImageUploaded");
                 }
             );
         } catch (error) {
@@ -170,12 +162,13 @@ const ImagePickerScreen = ({ navigation }) => {
                     <TouchableOpacity onPress={showModal} className="h-10 flex-1 items-center justify-center bg-gray-800 rounded-full mx-20">
                         <Text className=" text-lg font-bold text-white">Pick Amount</Text>
                     </TouchableOpacity>
-                </View>
+                    
 
                 <View className="mx-10 mt-10">
-                    <TouchableOpacity onPress={uploadImageToFirebase(pickedImage)} style={styles.button}>
+                    <TouchableOpacity onPress={uploadImageToFirebase} style={styles.button}>
                         <Text style={styles.buttonText}>Send</Text>
                     </TouchableOpacity>
+                </View>
                 </View>
             </View>
         </ScrollView>
