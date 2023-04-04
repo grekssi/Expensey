@@ -9,6 +9,9 @@ import { TailwindProvider } from 'tailwindcss-react-native';
 import ImagePickerScreen from './screens/ImagePickerScreen';
 import ImagesScreen from './screens/ImagesScreen';
 import ImageUploadedScreen from './screens/ImageUploadedScreen';
+import LoadingScreen from './screens/LoadingScreen';
+import { store } from './store';
+import { Provider } from 'react-redux';
 
 const Stack = createStackNavigator();
 const globalScreenOptions = {
@@ -20,18 +23,27 @@ const globalScreenOptions = {
 export default function App() {
   return (
     <NavigationContainer>
-      <TailwindProvider>
-        <Stack.Navigator screenOptions={globalScreenOptions}>
-        <Stack.Screen name="ImageUploaded" component={ImageUploadedScreen} options={{ presentation: "fullScreenModal", headerShown: false }}/>
+      <Provider store={store}>
+        <TailwindProvider>
+          <Stack.Navigator screenOptions={globalScreenOptions}>
+            <Stack.Screen name="Login" component={LoginScreen} options={{ presentation: "fullScreenModal", headerShown: false }} />
 
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="ImagePicker" component={ImagePickerScreen} />
+            <Stack.Screen name="Loading" component={LoadingScreen} options={{ presentation: "fullScreenModal", headerShown: false }} />
 
-          <Stack.Screen name="Images" component={ImagesScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
-        </Stack.Navigator>
-      </TailwindProvider>
+
+
+            <Stack.Screen name="ImagePicker" component={ImagePickerScreen} />
+            <Stack.Screen name="ImageUploaded" component={ImageUploadedScreen} options={{ presentation: "fullScreenModal", headerShown: false }} />
+
+
+
+
+            <Stack.Screen name="Images" component={ImagesScreen} options={{ presentation: "fullScreenModal", headerShown: false }} />
+            <Stack.Screen name="Register" component={RegisterScreen} options={{ presentation: "fullScreenModal", headerShown: false }} />
+            <Stack.Screen name="Home" component={HomeScreen} options={{ presentation: "fullScreenModal", headerShown: false }} />
+          </Stack.Navigator>
+        </TailwindProvider>
+      </Provider>
     </NavigationContainer>
   );
 }

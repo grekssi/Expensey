@@ -10,7 +10,7 @@ import mime from 'mime'
 import { getStorage, ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { StackView } from '@react-navigation/stack'
-
+import * as Animatable from "react-native-animatable"
 
 
 const ImagePickerScreen = ({ navigation }) => {
@@ -59,6 +59,8 @@ const ImagePickerScreen = ({ navigation }) => {
             const filename = `${auth?.currentUser.email}:${date.getMonth()}:${date.getFullYear()}:${enteredNumber}` + '.jpg'; // You can customize the file name here
             const storageRef = ref(storage, `images/${filename}`);
             const uploadTask = uploadBytesResumable(storageRef, blob);
+
+            navigation.navigate("Loading");
             uploadTask.on(
                 'state_changed',
                 (snapshot) => {
@@ -68,7 +70,6 @@ const ImagePickerScreen = ({ navigation }) => {
                     console.error('Error uploading image:', error);
                 },
                 async () => {
-                    navigation.navigate("ImageUploaded");
                 }
             );
         } catch (error) {
@@ -80,8 +81,8 @@ const ImagePickerScreen = ({ navigation }) => {
         setEnteredNumber(textFieldValue);
         setTextFieldValue('');
         setModalVisible(false);
-      };
-    
+    };
+
     useLayoutEffect(() => {
         navigation.setOptions({
             title: "Signal",
@@ -162,67 +163,76 @@ const ImagePickerScreen = ({ navigation }) => {
                     <TouchableOpacity onPress={showModal} className="h-10 flex-1 items-center justify-center bg-gray-800 rounded-full mx-20">
                         <Text className=" text-lg font-bold text-white">Pick Amount</Text>
                     </TouchableOpacity>
-                    
 
-                <View className="mx-10 mt-10">
-                    <TouchableOpacity onPress={uploadImageToFirebase} style={styles.button}>
-                        <Text style={styles.buttonText}>Send</Text>
-                    </TouchableOpacity>
-                </View>
+
+                    <View className="mx-10 mt-10">
+                        <TouchableOpacity onPress={uploadImageToFirebase} style={styles.button}>
+                            <Text style={styles.buttonText}>Send</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
+
+
+
+
+            <View className="absolute h-max w-max left-0 right-0 bg-black">
+
+            </View>
+
+
         </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     openModalButton: {
-      backgroundColor: '#2196F3',
-      padding: 10,
-      borderRadius: 5,
+        backgroundColor: '#2196F3',
+        padding: 10,
+        borderRadius: 5,
     },
     openModalButtonText: {
-      color: 'white',
-      fontSize: 18,
+        color: 'white',
+        fontSize: 18,
     },
     modalView: {
-      backgroundColor: 'white',
-      padding: 20,
-      borderRadius: 5,
-      alignItems: 'center',
-      alignSelf: 'center',
-      width: '80%',
-      marginTop: '50%',
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 5,
+        alignItems: 'center',
+        alignSelf: 'center',
+        width: '80%',
+        marginTop: '50%',
     },
     modalTitle: {
-      fontSize: 24,
-      marginBottom: 15,
+        fontSize: 24,
+        marginBottom: 15,
     },
     textInput: {
-      borderWidth: 1,
-      borderColor: 'gray',
-      width: '100%',
-      paddingHorizontal: 10,
-      paddingVertical: 5,
-      marginBottom: 15,
+        borderWidth: 1,
+        borderColor: 'gray',
+        width: '100%',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        marginBottom: 15,
     },
     submitButton: {
-      backgroundColor: '#2196F3',
-      padding: 10,
-      borderRadius: 5,
+        backgroundColor: '#2196F3',
+        padding: 10,
+        borderRadius: 5,
     },
     submitButtonText: {
-      color: 'white',
-      fontSize: 18,
+        color: 'white',
+        fontSize: 18,
     },
     result: {
-      marginTop: 20,
-      fontSize: 18,
+        marginTop: 20,
+        fontSize: 18,
     },
     button: {
         width: '100%',
@@ -237,6 +247,6 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: 'white',
     },
-  });
+});
 
 export default ImagePickerScreen
