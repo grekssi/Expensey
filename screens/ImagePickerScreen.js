@@ -47,7 +47,6 @@ const ImagePickerScreen = ({ navigation }) => {
 
         if (!result.canceled) {
             setPickedImage(result.assets[0].uri);
-            console.log(pickedImage);
         }
     };
 
@@ -55,7 +54,6 @@ const ImagePickerScreen = ({ navigation }) => {
         try {
             const response = await fetch(pickedImage);
             const blob = await response.blob();
-            console.log("kur")
             const filename = `${auth?.currentUser.email}:${date.getMonth()}:${date.getFullYear()}:${enteredNumber}` + '.jpg'; // You can customize the file name here
             const storageRef = ref(storage, `images/${filename}`);
             const uploadTask = uploadBytesResumable(storageRef, blob);

@@ -12,6 +12,7 @@ import ImageUploadedScreen from './screens/ImageUploadedScreen';
 import LoadingScreen from './screens/LoadingScreen';
 import { store } from './store';
 import { Provider } from 'react-redux';
+import UsersScreen from './screens/UsersScreen';
 
 const Stack = createStackNavigator();
 const globalScreenOptions = {
@@ -41,6 +42,8 @@ export default function App() {
             <Stack.Screen name="Images" component={ImagesScreen} options={{ presentation: "fullScreenModal", headerShown: false }} />
             <Stack.Screen name="Register" component={RegisterScreen} options={{ presentation: "fullScreenModal", headerShown: false }} />
             <Stack.Screen name="Home" component={HomeScreen} options={{ presentation: "fullScreenModal", headerShown: false }} />
+            <Stack.Screen name="Users" component={UsersScreen} options={{ presentation: "fullScreenModal", headerShown: false }} />
+
           </Stack.Navigator>
         </TailwindProvider>
       </Provider>

@@ -3,15 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Image, Dimensions, StyleSheet } from 'react-native';
 import { storage } from '../firebase';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectImages, setImages } from '../features/imagesSlice';
+import { selectImages, selectUserEmails, setImages } from '../features/imagesSlice';
 
 const windowWidth = Dimensions.get('window').width;
 
-const ImagesScreen = () => {
-
-    return (
-        <ScrollView contentContainerStyle={styles.scrollView}>
-            {Object.entries(useSelector(selectImages)).map(([month, images]) => (
+const UsersScreen = () => {
+  return (
+    <ScrollView contentContainerStyle={styles.scrollView}>
+            {Object.entries(useSelector(selectUserEmails)).map(([month, images]) => (
                 <View key={month} style={styles.monthContainer}>
                     <Text style={styles.monthTitle}>{month}</Text>
                     {images.map((image, index) => (
@@ -23,8 +22,8 @@ const ImagesScreen = () => {
                 </View>
             ))}
         </ScrollView>
-    );
-};
+  )
+}
 
 const styles = StyleSheet.create({
     scrollView: {
@@ -55,4 +54,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ImagesScreen;
+export default UsersScreen
