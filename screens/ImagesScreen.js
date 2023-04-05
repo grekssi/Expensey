@@ -3,15 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Image, Dimensions, StyleSheet } from 'react-native';
 import { storage } from '../firebase';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectImages, setImages } from '../features/imagesSlice';
+import { selectImages, selectImagesByEmail, setImages } from '../features/imagesSlice';
 
 const windowWidth = Dimensions.get('window').width;
 
-const ImagesScreen = () => {
+const ImagesScreen = ({
+    route
+}) => {
+    var email = route.params.email;
 
     return (
         <ScrollView contentContainerStyle={styles.scrollView}>
-            {Object.entries(useSelector(selectImages)).map(([month, images]) => (
+            {Object.entries(useSelector(state => selectImagesByEmail(state, email))).map(([month, images]) => (
                 <View key={month} style={styles.monthContainer}>
                     <Text style={styles.monthTitle}>{month}</Text>
                     {images.map((image, index) => (

@@ -28,6 +28,7 @@ const ImagePickerScreen = ({ navigation }) => {
         const currentDate = selectedDate || date;
         setShowDatePicker(Platform.OS === 'ios');
         setDate(currentDate);
+        console.log(date);
     };
 
     const showModal = () => {
@@ -54,7 +55,7 @@ const ImagePickerScreen = ({ navigation }) => {
         try {
             const response = await fetch(pickedImage);
             const blob = await response.blob();
-            const filename = `${auth?.currentUser.email}:${date.getMonth()}:${date.getFullYear()}:${enteredNumber}` + '.jpg'; // You can customize the file name here
+            const filename = `${auth?.currentUser.email}:${date.getMonth() + 1}:${date.getFullYear()}:${enteredNumber}` + '.jpg'; // You can customize the file name here
             const storageRef = ref(storage, `images/${filename}`);
             const uploadTask = uploadBytesResumable(storageRef, blob);
 
@@ -143,7 +144,7 @@ const ImagePickerScreen = ({ navigation }) => {
                 </Modal>
 
                 <View className="flex-row space-x-16 justify-center mt-10">
-                    <Text className="text-xl font-bold">Date : {date.getMonth()}/{date.getFullYear()}</Text>
+                    <Text className="text-xl font-bold">Date : {date.getMonth() + 1}/{date.getFullYear()}</Text>
                     <Text className="text-xl font-bold">Amount : {enteredNumber}lv</Text>
 
                 </View>

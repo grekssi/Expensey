@@ -4,31 +4,33 @@ import { View, Text, ScrollView, Image, Dimensions, StyleSheet } from 'react-nat
 import { storage } from '../firebase';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectImages, selectUserEmails, setImages } from '../features/imagesSlice';
+import { TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const windowWidth = Dimensions.get('window').width;
 
 const UsersScreen = () => {
-  return (
-    <ScrollView contentContainerStyle={styles.scrollView}>
+    const navigation = useNavigation();
+
+    return (
+        <ScrollView contentContainerStyle={styles.scrollView}>
             {Object.entries(useSelector(selectUserEmails)).map(([month, images]) => (
-                <View key={month} style={styles.monthContainer}>
-                    <Text style={styles.monthTitle}>{month}</Text>
-                    {images.map((image, index) => (
-                        <View key={index} style={styles.imageRow}>
-                            <Image source={{ uri: image.url }} style={styles.image} />
-                            <Text style={styles.imageAmount}>{image.amount} Лв.</Text>
-                        </View>
-                    ))}
-                </View>
+                <TouchableOpacity key={month} style={styles.monthContainer}>
+                    <Text style={styles.monthTitle} onPress={() => navigation.navigate("Images", { email: images })} className="bg-gray-200 p-4">{images}</Text>
+                </TouchableOpacity>
             ))}
+
+            <TouchableOpacity onPress={() => navigation.navigate("ImagePicker")} className="mx-24 p-5 bg-black rounded-full items-center bottom-0">
+                <Text className="text-white text-xl font-bold">Select Image</Text>
+            </TouchableOpacity>
         </ScrollView>
-  )
+    )
 }
 
 const styles = StyleSheet.create({
     scrollView: {
         flexGrow: 1,
-        padding: 16,
+        marginTop: 16
     },
     monthContainer: {
         marginBottom: 24,
