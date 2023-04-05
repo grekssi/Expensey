@@ -7,6 +7,10 @@ import { selectImages, selectImagesByEmail, setImages } from '../features/images
 
 const windowWidth = Dimensions.get('window').width;
 
+const getTotalAmount = (images) => {
+    return images.reduce((total, image) => total + image.amount, 0);
+  };
+
 const ImagesScreen = ({
     route
 }) => {
@@ -16,7 +20,7 @@ const ImagesScreen = ({
         <ScrollView contentContainerStyle={styles.scrollView}>
             {Object.entries(useSelector(state => selectImagesByEmail(state, email))).map(([month, images]) => (
                 <View key={month} style={styles.monthContainer}>
-                    <Text style={styles.monthTitle}>{month}</Text>
+                    <Text style={styles.monthTitle}>{month} - {getTotalAmount(images)} Лв.</Text>
                     {images.map((image, index) => (
                         <View key={index} style={styles.imageRow}>
                             <Image source={{ uri: image.url }} style={styles.image} />

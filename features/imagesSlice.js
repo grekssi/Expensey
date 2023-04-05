@@ -32,8 +32,8 @@ export const selectImagesByEmail = (state, email) => {
             image => image.email === email
         );
     });
-    
-    return getNonEmptyDates(filteredImagesByMonth);
+
+    return filteredImagesByMonth;
 };
 
 export const selectUserEmails = state => {
