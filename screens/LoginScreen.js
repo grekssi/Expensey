@@ -195,14 +195,17 @@ const styles = StyleSheet.create({
     color: "#424242",
     textAlign: "center",
     height: 40,
+    width: 300
   },
   passwordContainer: {
+    width: 300,
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
   },
   eyeIcon: {
     marginLeft: 10,
+    marginBottom: 10
   },
   button: {
     width: 200,

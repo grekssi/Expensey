@@ -100,6 +100,30 @@ const ImagePickerScreen = ({ navigation }) => {
 
     return (
         <ScrollView className="flex-col space-y-4">
+             <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={styles.overlay} />
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalTitle}>Enter a Number</Text>
+                        <TextInput
+                            style={styles.textInput}
+                            onChangeText={(text) => setTextFieldValue(text)}
+                            value={textFieldValue}
+                            keyboardType="numeric"
+                            placeholder="Enter number"
+                        />
+                        <TouchableOpacity
+                            style={styles.submitButton}
+                            onPress={handleSubmit}
+                        >
+                            <Text style={styles.submitButtonText}>Submit</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Modal>
             <View>
                 <View className="items-center h-96">
                     {pickedImage && (
@@ -118,30 +142,7 @@ const ImagePickerScreen = ({ navigation }) => {
                         display="default"
                         onChange={onChange}
                     />)}
-
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={modalVisible}
-                    onRequestClose={() => setModalVisible(false)}
-                >
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalTitle}>Enter a Number</Text>
-                        <TextInput
-                            style={styles.textInput}
-                            onChangeText={(text) => setTextFieldValue(text)}
-                            value={textFieldValue}
-                            keyboardType="numeric"
-                            placeholder="Enter number"
-                        />
-                        <TouchableOpacity
-                            style={styles.submitButton}
-                            onPress={handleSubmit}
-                        >
-                            <Text style={styles.submitButtonText}>Submit</Text>
-                        </TouchableOpacity>
-                    </View>
-                </Modal>
+               
 
                 <View className="flex-row space-x-16 justify-center mt-10">
                     <Text className="text-xl font-bold">Date : {date.getMonth() + 1}/{date.getFullYear()}</Text>
@@ -199,19 +200,6 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 18,
     },
-    modalView: {
-        backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 5,
-        alignItems: 'center',
-        alignSelf: 'center',
-        width: '80%',
-        marginTop: '50%',
-    },
-    modalTitle: {
-        fontSize: 24,
-        marginBottom: 15,
-    },
     textInput: {
         borderWidth: 1,
         borderColor: 'gray',
@@ -219,15 +207,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 5,
         marginBottom: 15,
-    },
-    submitButton: {
-        backgroundColor: '#2196F3',
-        padding: 10,
-        borderRadius: 5,
-    },
-    submitButtonText: {
-        color: 'white',
-        fontSize: 18,
     },
     result: {
         marginTop: 20,
@@ -245,6 +224,52 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 24,
         color: 'white',
+    },
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalView: {
+        position: 'absolute',
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        alignSelf: 'center',
+        width: '80%',
+        marginTop: '50%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 24,
+        marginBottom: 15,
+        fontWeight: 'bold',
+    },
+    textInput: {
+        borderWidth: 1,
+        borderColor: 'gray',
+        width: '100%',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        marginBottom: 15,
+        borderRadius: 5,
+    },
+    submitButton: {
+        flex: 1,
+        justifyContent:'center',
+        alignItems: 'center',
+        borderRadius: 10,
+        height: 0,
+        width: 80,
+        backgroundColor: '#2196F3',
+    },
+    submitButtonText: {
+        color: 'white',
+        fontSize: 18,
     },
 });
 
