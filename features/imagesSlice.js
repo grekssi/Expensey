@@ -39,7 +39,8 @@ export const selectImagesByEmail = (state, email) => {
   return filteredImagesByMonth;
 };
 
-export const selectUserEmails = (state) => {
+export const selectUserEmails = (state, parentUsers) => {
+  console.log(parentUsers);
   const imagesByMonth = state.images.imagesByMonth;
   const userEmails = [];
 
@@ -51,8 +52,12 @@ export const selectUserEmails = (state) => {
     });
   });
 
-  console.log(userEmails);
-  return userEmails;
+  // Only return emails that are also in parentUsers
+  const accessibleUserEmails = userEmails.filter((email) =>
+    parentUsers.includes(email)
+  );
+
+  return accessibleUserEmails;
 };
 
 export default imagesSlice.reducer;
