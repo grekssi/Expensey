@@ -98,11 +98,8 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <KeyboardAvoidingView style={styles.container}>
-      <StatusBar style="light" />
       <Image
-        source={{
-          uri: "https://seeklogo.com/images/S/signal-logo-20A1616F60-seeklogo.com.png",
-        }}
+        source={require("../assets/expenseyLogo.png")}
         style={styles.logo}
       />
       <View style={styles.inputContainer}>
@@ -162,14 +159,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
     padding: 10,
     backgroundColor: "#F3F3F3",
   },
   logo: {
     width: 180,
     height: 180,
-    marginBottom: 30,
+    marginTop: 100
   },
   inputBox: {
     backgroundColor: "#FFFFFF",
@@ -182,6 +178,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: 300,
+    marginTop: 100
   },
   input: {
     backgroundColor: "#FFFFFF",

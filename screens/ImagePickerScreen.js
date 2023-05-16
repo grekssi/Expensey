@@ -77,59 +77,50 @@ const ImagePickerScreen = ({ navigation }) => {
     };
 
     const handleSubmit = () => {
-        setEnteredNumber(textFieldValue);
-        setTextFieldValue('');
-        setModalVisible(false);
+        const inputNumber = parseFloat(textFieldValue);
+        if (inputNumber <= 99.99) {
+            setEnteredNumber(inputNumber.toFixed(2));
+            setTextFieldValue('');
+            setModalVisible(false);
+        } else {
+            Alert.alert('Invalid Amount', 'Please enter an amount not larger than 99.99lv');
+        }
     };
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            title: "Signal",
-            headerStyle: { backgroundColor: "#fff" },
-            headerTitleStyle: { color: "black" },
-            headerTintColor: "black",
-            headerLeft: () => (
-                <View style={{ marginLeft: 20 }}>
-                    <TouchableOpacity onPress={pickImage}>
-                        <Avatar rounded source={{ uri: auth?.currentUser?.photoURL }} />
+    return (
+        <ScrollView style={styles.scrollViewContainer}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.overlay} />
+                <View style={styles.modalView}>
+                    <Text style={styles.modalTitle}>Enter a Number</Text>
+                    <TextInput
+                        style={styles.textInput}
+                        onChangeText={(text) => setTextFieldValue(text)}
+                        value={textFieldValue}
+                        keyboardType="numeric"
+                        placeholder="Enter number"
+                        maxLength={5}
+                    />
+                    <TouchableOpacity
+                        style={styles.submitButton}
+                        onPress={handleSubmit}
+                    >
+                        <Text style={styles.submitButtonText}>Submit</Text>
                     </TouchableOpacity>
                 </View>
-            )
-        })
-    }, [])
+            </Modal>
 
-    return (
-        <ScrollView className="flex-col space-y-4">
-             <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={modalVisible}
-                    onRequestClose={() => setModalVisible(false)}
-                >
-                    <View style={styles.overlay} />
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalTitle}>Enter a Number</Text>
-                        <TextInput
-                            style={styles.textInput}
-                            onChangeText={(text) => setTextFieldValue(text)}
-                            value={textFieldValue}
-                            keyboardType="numeric"
-                            placeholder="Enter number"
-                        />
-                        <TouchableOpacity
-                            style={styles.submitButton}
-                            onPress={handleSubmit}
-                        >
-                            <Text style={styles.submitButtonText}>Submit</Text>
-                        </TouchableOpacity>
-                    </View>
-                </Modal>
             <View>
                 <View className="items-center h-96">
                     {pickedImage && (
                         <Image
                             source={{ uri: pickedImage }}
-                            style={{ width: 400, height: 400 }}
+                            style={{ width: 350, height: 350 }}
                             resizeMode="contain"
                         />
                     )}
@@ -142,50 +133,50 @@ const ImagePickerScreen = ({ navigation }) => {
                         display="default"
                         onChange={onChange}
                     />)}
-               
 
-                <View className="flex-row space-x-16 justify-center mt-10">
-                    <Text className="text-xl font-bold">Date : {date.getMonth() + 1}/{date.getFullYear()}</Text>
-                    <Text className="text-xl font-bold">Amount : {enteredNumber}lv</Text>
+
+                <View style={styles.monthContainer}>
+                    <View style={styles.imageRow}>
+                        <Text className="text-xl font-bold text-gray-700">Date : {date.getMonth() + 1}/{date.getFullYear()}</Text>
+                    </View>
+                    <View style={styles.imageRow}>
+                        <Text className="text-xl font-bold text-gray-700">Amount : {enteredNumber}lv</Text>
+                    </View>
 
                 </View>
 
-                <View className="mt-10 flex-col space-y-5">
+                <View className="mt-10 flex-col space-y-5 items-center">
 
-                    <TouchableOpacity onPress={pickImage} className="h-10 flex-1 items-center justify-center bg-gray-800 rounded-full mx-20">
-                        <Text className=" text-lg font-bold text-white">Pick Image</Text>
+                    <TouchableOpacity onPress={pickImage} style={styles.buttonContainer}>
+                        <Text className=" text-lg font-bold text-gray-700">Pick Image</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={showPicker} className="h-10 flex-1 items-center justify-center bg-gray-800 rounded-full mx-20">
-                        <Text className=" text-lg font-bold text-white">Pick Date</Text>
+                    <TouchableOpacity onPress={showPicker} style={styles.buttonContainer}>
+                        <Text className=" text-lg font-bold text-gray-700">Pick Date</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={showModal} className="h-10 flex-1 items-center justify-center bg-gray-800 rounded-full mx-20">
-                        <Text className=" text-lg font-bold text-white">Pick Amount</Text>
+                    <TouchableOpacity onPress={showModal} style={styles.buttonContainer}>
+                        <Text className=" text-lg font-bold text-gray-700">Pick Amount</Text>
                     </TouchableOpacity>
 
 
                     <View className="mx-10 mt-10">
-                        <TouchableOpacity onPress={uploadImageToFirebase} style={styles.button}>
+                        <TouchableOpacity onPress={uploadImageToFirebase} className="bg-gray-600 p-4 w-80 rounded-3xl">
                             <Text style={styles.buttonText}>Send</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
             </View>
-
-
-
-
-            <View className="absolute h-max w-max left-0 right-0 bg-black">
-
-            </View>
-
-
         </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
+    scrollViewContainer: {
+        flex: 1,
+        flexDirection: 'column',
+        backgroundColor: '#F1F1F1',
+      },
     container: {
         flex: 1,
         justifyContent: 'center',
@@ -213,8 +204,8 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
     button: {
-        width: '100%',
-        backgroundColor: 'black',
+        width: 300,
+        backgroundColor: 'gray',
         height: 56,
         borderRadius: 9999,
         justifyContent: 'center',
@@ -260,7 +251,7 @@ const styles = StyleSheet.create({
     },
     submitButton: {
         flex: 1,
-        justifyContent:'center',
+        justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 10,
         height: 0,
@@ -270,6 +261,51 @@ const styles = StyleSheet.create({
     submitButtonText: {
         color: 'white',
         fontSize: 18,
+    },
+    buttonContainer: {
+        justifyContent: 'center',
+        alignItems: "center",
+        marginHorizontal: 30,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 10,
+        padding: 10,
+        width: 200,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    monthContainer: {
+        flexDirection: 'row',
+        gap: 30,
+        justifyContent: 'center',
+        alignItems: "center",
+        marginHorizontal: 30,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 10,
+        padding: 16,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    imageRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: 11,
+        backgroundColor: "#F8F8F8",
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "#E0E0E0",
     },
 });
 

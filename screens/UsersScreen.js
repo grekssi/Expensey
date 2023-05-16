@@ -17,6 +17,7 @@ import {
 } from "../features/imagesSlice";
 import { TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { StatusBar } from "expo-status-bar";
 
 const windowWidth = Dimensions.get("window").width;
 
