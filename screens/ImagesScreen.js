@@ -22,7 +22,7 @@ const getTotalAmount = (images) => {
   return images.reduce((total, image) => total + image.amount, 0);
 };
 
-const ImagesScreen = ({ route }) => {
+const ImagesScreen = ({ route, navigation }) => {
   const email = route.params.email;
 
   return (

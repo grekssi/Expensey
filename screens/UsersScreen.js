@@ -1,4 +1,3 @@
-import { getDownloadURL, listAll, ref } from "firebase/storage";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -9,28 +8,23 @@ import {
   StyleSheet,
 } from "react-native";
 import { auth, db, storage } from "../firebase";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  selectImages,
-  selectUserEmails,
-  setImages,
-} from "../features/imagesSlice";
+import { useSelector } from "react-redux";
+import { selectUserEmails } from "../features/imagesSlice";
 import { TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { StatusBar } from "expo-status-bar";
-import {
-  collection,
-  getDocs,
-  getFirestore,
-  query,
-  where,
-} from "firebase/firestore";
-
-const windowWidth = Dimensions.get("window").width;
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { ActivityIndicator } from "react-native";
+import { BarCodeScanner } from "expo-barcode-scanner";
 
 const UsersScreen = ({ navigation }) => {
   const userID = auth.currentUser.email;
   const [accessUsers, setAccessUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isScannerVisible, setIsScannerVisible] = useState(false);
+
+  const handleBarCodeScanned = ({ type, data }) => {
+    setIsScannerVisible(false);
+    alert(`${data}`);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,7 +32,6 @@ const UsersScreen = ({ navigation }) => {
         collection(db, "UserAccess"),
         where("ParentUser", "==", userID)
       );
-
       const querySnapshot = await getDocs(userAccessQuery);
 
       const parents = [];
@@ -50,27 +43,46 @@ const UsersScreen = ({ navigation }) => {
     };
 
     fetchData();
-  }, []); // Empty dependency array means this effect will only run once (like componentDidMount in classes)
+  }, []);
+
+  const onLayoutHandler = () => {
+    setLoading(false);
+  };
+
+  const userEmails = useSelector((state) =>
+    selectUserEmails(state, accessUsers)
+  );
+
   return (
     <>
       <ScrollView contentContainerStyle={styles.scrollView}>
-        {useSelector((state) => selectUserEmails(state, accessUsers)).map(
-          (email, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.userContainer}
-              onPress={() => navigation.navigate("Images", { email })}
-            >
-              <Text style={styles.userEmail}>{email}</Text>
-            </TouchableOpacity>
-          )
-        )}
+        {userEmails.map((email, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.userContainer}
+            onPress={() => navigation.navigate("Images", { email })}
+            onLayout={
+              index === userEmails.length - 1 ? onLayoutHandler : undefined
+            }
+          >
+            <Text style={styles.userEmail}>{email}</Text>
+          </TouchableOpacity>
+        ))}
       </ScrollView>
+      {loading && (
+        <View style={styles.backgroundButton}>
+          <ActivityIndicator
+            style={styles.activityIndicator}
+            size="large"
+            color="#00b3ff"
+          ></ActivityIndicator>
+        </View>
+      )}
       <TouchableOpacity
         style={styles.floatingButtonWide}
-        onPress={() => navigation.navigate("ImagePicker")} // You can change the navigation here
+        onPress={() => setIsScannerVisible(true)} // Navigate to QRCodeScreen
       >
-        <Text style={styles.wideButtonText}>Add User</Text>
+        <Text style={styles.wideButtonText}>Scan QR Code</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.floatingButton}
@@ -78,11 +90,37 @@ const UsersScreen = ({ navigation }) => {
       >
         <Text style={styles.buttonText}>+</Text>
       </TouchableOpacity>
+
+      {isScannerVisible && (
+        <BarCodeScanner
+          onBarCodeScanned={handleBarCodeScanned}
+          style={StyleSheet.absoluteFillObject}
+        />
+      )}
     </>
   );
 };
 
 const styles = StyleSheet.create({
+  activityIndicator: {
+    top: 0,
+    bottom: 0,
+    right: 0,
+    left: 0,
+    position: "absolute",
+  },
+  backgroundButton: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+    backgroundColor: "#b4b4b4",
+    paddingHorizontal: 20,
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+  },
   scrollView: {
     paddingTop: 50,
     flexGrow: 1,

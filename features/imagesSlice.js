@@ -40,7 +40,6 @@ export const selectImagesByEmail = (state, email) => {
 };
 
 export const selectUserEmails = (state, parentUsers) => {
-  console.log(parentUsers);
   const imagesByMonth = state.images.imagesByMonth;
   const userEmails = [];
 
