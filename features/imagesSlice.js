@@ -50,13 +50,9 @@ export const selectUserEmails = (state, parentUsers) => {
       }
     });
   });
-
-  // Only return emails that are also in parentUsers
-  const accessibleUserEmails = userEmails.filter((email) =>
-    parentUsers.includes(email)
-  );
-
-  return accessibleUserEmails;
+ 
+  console.log("fetching slice")
+  return parentUsers;
 };
 
 export default imagesSlice.reducer;

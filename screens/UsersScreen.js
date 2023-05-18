@@ -11,7 +11,7 @@ import { auth, db, storage } from "../firebase";
 import { useSelector } from "react-redux";
 import { selectUserEmails } from "../features/imagesSlice";
 import { TouchableOpacity } from "react-native";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { ActivityIndicator } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 
@@ -21,27 +21,50 @@ const UsersScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [isScannerVisible, setIsScannerVisible] = useState(false);
 
+
   const handleBarCodeScanned = ({ type, data }) => {
     setIsScannerVisible(false);
-    alert(`${data}`);
+    addUserAccess(data);
+
+    fetchData();
   };
 
+  async function addUserAccess(qrUserEmail) {
+    const userAccessCol = collection(db, "UserAccess");
+
+    // Set the "AccessUser" and "ParentUser" fields of the document
+    console.log(qrUserEmail);
+    console.log(auth.currentUser.email);
+
+    const docRef = await addDoc(userAccessCol, {
+        AccessUser: qrUserEmail,
+        ParentUser: auth.currentUser.email
+    });
+
+    console.log("Document written with ID: ", docRef.id);
+}
+
+
+const fetchData = async () => {
+  const userAccessQuery = query(
+    collection(db, "UserAccess"),
+    where("ParentUser", "==", userID)
+  );
+  const querySnapshot = await getDocs(userAccessQuery);
+    console.log("fetching")
+  const parents = [];
+  querySnapshot.forEach((doc) => {
+    parents.push(doc.data().AccessUser);
+  });
+
+  if (parents.length === 0) {
+    setLoading(false);
+  }
+  setAccessUsers(parents);
+};
+
+
   useEffect(() => {
-    const fetchData = async () => {
-      const userAccessQuery = query(
-        collection(db, "UserAccess"),
-        where("ParentUser", "==", userID)
-      );
-      const querySnapshot = await getDocs(userAccessQuery);
-
-      const parents = [];
-      querySnapshot.forEach((doc) => {
-        parents.push(doc.data().AccessUser);
-      });
-
-      setAccessUsers(parents);
-    };
-
     fetchData();
   }, []);
 
