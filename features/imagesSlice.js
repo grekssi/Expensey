@@ -1,5 +1,6 @@
 // src/redux/imagesSlice.js
 import { createSlice } from "@reduxjs/toolkit";
+import { auth } from "../firebase";
 
 const imagesSlice = createSlice({
   name: "images",
@@ -36,6 +37,7 @@ export const selectImagesByEmail = (state, email) => {
     }
   });
 
+
   return filteredImagesByMonth;
 };
 
@@ -50,8 +52,9 @@ export const selectUserEmails = (state, parentUsers) => {
       }
     });
   });
- 
-  console.log("fetching slice")
+
+  userEmails.push(auth?.currentUser?.email);
+  
   return parentUsers;
 };
 

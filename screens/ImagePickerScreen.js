@@ -1,25 +1,50 @@
-import { Alert, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, Dimensions, Image, Modal, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
 import React, { useLayoutEffect, useState } from 'react'
-import { SafeAreaView } from 'react-native'
 import { ScrollView } from 'react-native'
-import CustomListItem from '../components/CustomListItem'
-import { Avatar, Button } from 'react-native-elements'
 import { auth, storage } from '../firebase'
 import * as ImagePicker from 'expo-image-picker'
-import mime from 'mime'
-import { getStorage, ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
+import { getDownloadURL, getStorage, ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { StackView } from '@react-navigation/stack'
+import { addDoc, collection, doc, getFirestore, setDoc } from 'firebase/firestore'
 import * as Animatable from "react-native-animatable"
+import { useEffect } from 'react'
+import { useNavigation } from '@react-navigation/native'
 
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+const monthNames = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+];
 
 const ImagePickerScreen = ({ navigation }) => {
+    var nav = useNavigation();
 
     const [pickedImage, setPickedImage] = useState(null);
     const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
+
+    const [isUploading, setIsUploading] = useState(false);
+
     const [modalVisible, setModalVisible] = useState(false);
     const [textFieldValue, setTextFieldValue] = useState('');
+    const [validationModalVisible, setValidationModalVisible] = useState(false);
+    const [showImage, setShowImage] = useState(false);
+
+    useEffect(() => {
+        try {
+            if (isUploading) {
+                const timer = setTimeout(() => {
+                    setShowImage(true);
+                    nav.navigate("Users");
+                }, 3000);
+                return () => clearTimeout(timer); // This will clear Timeout when component unmounts.
+            } else {
+                setShowImage(false); // When not uploading, don't show the secondary image
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }, [isUploading, nav]); // Ensure 'nav' is in your dependency array.
 
     // State for storing the entered number
     const [enteredNumber, setEnteredNumber] = useState(null);
@@ -28,7 +53,6 @@ const ImagePickerScreen = ({ navigation }) => {
         const currentDate = selectedDate || date;
         setShowDatePicker(Platform.OS === 'ios');
         setDate(currentDate);
-        console.log(date);
     };
 
     const showModal = () => {
@@ -51,30 +75,73 @@ const ImagePickerScreen = ({ navigation }) => {
         }
     };
 
+    const addNewDocument = async (email, date, amount, imageUrl, isPaid) => {
+        const db = getFirestore();
+
+        const newDocument = {
+            Email: email,
+            Date: date,
+            Amount: amount,
+            ImageUrl: imageUrl,
+            IsPaid: isPaid
+        };
+
+        try {
+            const docRef = await addDoc(collection(db, "UserImages"), newDocument);
+            console.log("Document written with ID: ", docRef.id);
+        } catch (e) {
+            console.error("Error adding document: ", e);
+        }
+    };
+
+    const getCurrentDate = (dateToFormat) => {
+        const month = dateToFormat.getMonth() + 1; // getMonth() is zero-based
+        const year = dateToFormat.getFullYear();
+
+        return `${month < 10 ? '0' : ''}${month}/${year}`; // padding zero if month < 10
+    };
+
+
     const uploadImageToFirebase = async () => {
         try {
+
+            if (enteredNumber === null || pickedImage === null) {
+                setValidationModalVisible(true);
+                return;
+            }
+
+            setIsUploading(true);
+
             const response = await fetch(pickedImage);
             const blob = await response.blob();
-            const filename = `${auth?.currentUser.email}:${date.getMonth() + 1}:${date.getFullYear()}:${enteredNumber}` + '.jpg'; // You can customize the file name here
-            const storageRef = ref(storage, `images/${filename}`);
+            const storageRef = ref(storage, `images/${Date.now() + '_' + Math.floor(Math.random() * Math.floor(1000))}`);
             const uploadTask = uploadBytesResumable(storageRef, blob);
 
-            navigation.navigate("Loading");
-            uploadTask.on(
-                'state_changed',
-                (snapshot) => {
-                    // You can add a progress indicator here if you want
-                },
-                (error) => {
-                    console.error('Error uploading image:', error);
-                },
-                async () => {
-                }
-            );
+            const downloadURL = await new Promise((resolve, reject) => {
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        // You can add a progress indicator here if you want
+                    },
+                    (error) => {
+                        console.error('Error uploading image:', error);
+                        reject(error);
+                    },
+                    async () => {
+                        const url = await getDownloadURL(uploadTask.snapshot.ref);
+                        resolve(url);
+                    }
+                );
+            });
+
+            var date2 = getCurrentDate(date);
+
+            addNewDocument(auth?.currentUser.email, date2, enteredNumber, downloadURL, "none");
+
         } catch (error) {
             console.error('Error uploading image:', error);
         }
     };
+
 
     const handleSubmit = () => {
         const inputNumber = parseFloat(textFieldValue);
@@ -88,7 +155,7 @@ const ImagePickerScreen = ({ navigation }) => {
     };
 
     return (
-        <ScrollView style={styles.scrollViewContainer}>
+        <View style={styles.scrollViewContainer}>
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -116,36 +183,40 @@ const ImagePickerScreen = ({ navigation }) => {
             </Modal>
 
             <View>
-                <View className="items-center h-96">
-                    {pickedImage && (
-                        <Image
-                            source={{ uri: pickedImage }}
-                            style={{ width: 350, height: 350 }}
-                            resizeMode="contain"
-                        />
-                    )}
-                </View>
-
-                {showDatePicker && (
-                    <DateTimePicker
-                        value={date}
-                        mode="date"
-                        display="default"
-                        onChange={onChange}
-                    />)}
-
-
-                <View style={styles.monthContainer}>
-                    <View style={styles.imageRow}>
-                        <Text className="text-xl font-bold text-gray-700">Date : {date.getMonth() + 1}/{date.getFullYear()}</Text>
-                    </View>
-                    <View style={styles.imageRow}>
-                        <Text className="text-xl font-bold text-gray-700">Amount : {enteredNumber}lv</Text>
+                <View className="flex-col">
+                    <View style={styles.imageContainer}>
+                        {pickedImage && (
+                            <Image
+                                source={{ uri: pickedImage }}
+                                style={{ width: 350, height: 350 }}
+                                resizeMode="contain"
+                            />
+                        )}
                     </View>
 
-                </View>
+                    {showDatePicker && (
+                        <DateTimePicker
+                            value={date}
+                            mode="date"
+                            display="default"
+                            onChange={onChange}
+                        />)}
 
-                <View className="mt-10 flex-col space-y-5 items-center">
+
+
+                </View>
+            </View>
+
+            {!isUploading && (
+                <View className="flex-col space-y-3 items-center mb-5">
+                    <View style={styles.monthContainer}>
+                        <View style={styles.imageRow}>
+                            <Text className="text-lg font-bold text-gray-700">Date : {monthNames[date.getMonth()]} {date.getFullYear()}</Text>
+                        </View>
+                        <View style={styles.imageRow}>
+                            <Text className="text-lg font-bold text-gray-700">Amount : {enteredNumber}lv</Text>
+                        </View>
+                    </View>
 
                     <TouchableOpacity onPress={pickImage} style={styles.buttonContainer}>
                         <Text className=" text-lg font-bold text-gray-700">Pick Image</Text>
@@ -165,18 +236,73 @@ const ImagePickerScreen = ({ navigation }) => {
                             <Text style={styles.buttonText}>Send</Text>
                         </TouchableOpacity>
                     </View>
+                </View>)}
+
+            {isUploading && !showImage && (
+                <View className="items-center">
+                    <View className="align-middle self-center">
+                        <Animatable.Image
+                            source={require("../assets/loading.gif")}
+                            animation="slideInUp"
+                            iterationCount={1}
+                            className="h-96 w-96" />
+                    </View>
                 </View>
-            </View>
-        </ScrollView>
+            )}
+
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={validationModalVisible}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                }}>
+                <View style={styles.centeredView}>
+                    <View style={styles.validationModalView}>
+                        <Text style={styles.modalText}>Both image and amount must be filled!</Text>
+
+                        <TouchableHighlight
+                            style={{ ...styles.openButton, backgroundColor: '#2196F3' }}
+                            onPress={() => {
+                                setValidationModalVisible(!validationModalVisible);
+                            }}>
+                            <Text style={styles.textStyle}>Hide</Text>
+                        </TouchableHighlight>
+                    </View>
+                </View>
+            </Modal>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
+    validationModalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5
+    },
+    imageContainer: {
+        alignSelf: 'center',
+        height: windowHeight * 0.3,
+    },
     scrollViewContainer: {
         flex: 1,
         flexDirection: 'column',
+        height: windowHeight,
         backgroundColor: '#F1F1F1',
-      },
+        justifyContent: 'space-between'
+    },
     container: {
         flex: 1,
         justifyContent: 'center',
@@ -269,7 +395,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFFFFF",
         borderRadius: 10,
         padding: 10,
-        width: 200,
+        width: windowWidth * 0.9,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -280,14 +406,15 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     monthContainer: {
-        flexDirection: 'row',
-        gap: 30,
+        alignSelf: 'center',
+        flexDirection: 'column',
+        width: windowWidth * 0.9,
+        gap: 7,
         justifyContent: 'center',
         alignItems: "center",
-        marginHorizontal: 30,
         backgroundColor: "#FFFFFF",
         borderRadius: 10,
-        padding: 16,
+        padding: 10,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -298,14 +425,43 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     imageRow: {
+        width: windowWidth * 0.7, // 50% of the window width
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
-        padding: 11,
+        padding: 4,
         backgroundColor: "#F8F8F8",
         borderRadius: 10,
         borderWidth: 1,
         borderColor: "#E0E0E0",
+    },
+    image: {
+        width: windowWidth * 0.9, // 90% of the window width
+        height: windowHeight * 0.4, // 40% of the window height
+    },
+
+    openButton: {
+        width: 100,
+        backgroundColor: '#2196F3',
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+    },
+    textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    modalText: {
+        fontSize: 20,
+        marginBottom: 15,
+        textAlign: 'center',
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22,
+        backgroundColor: "rgba(0,0,0,0.5)" // this is the grayed-out background
     },
 });
 

@@ -9,8 +9,10 @@ import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Button, Input, Image } from "react-native-elements";
 import { StatusBar } from "expo-status-bar";
 import { KeyboardAvoidingView } from "react-native";
-import { auth, storage } from "../firebase";
+import { auth, db, storage } from "../firebase";
 import { FontAwesome } from "@expo/vector-icons";
+import * as Animatable from "react-native-animatable"
+
 import {
   onAuthStateChanged,
   setPersistence,
@@ -26,57 +28,19 @@ import {
   selectUserEmails,
   setImages,
 } from "../features/imagesSlice";
+import { collection, getDocs, query } from "firebase/firestore";
+import { verifyIdToken } from "firebase/auth";
 
 const LoginScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const [email, setEmail] = useState("");
+  const [userEmail, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const signIn = () => {
-    signInWithEmailAndPassword(auth, email, password).catch((error) =>
+    signInWithEmailAndPassword(auth, userEmail, password).catch((error) =>
       alert(error)
     );
-
-    fetchImages();
-  };
-
-  const fetchImages = async () => {
-    try {
-      const imageFolderRef = ref(storage, "images");
-      const imageList = await listAll(imageFolderRef);
-      const urlsByMonth = {};
-
-      for (const imageRef of imageList.items) {
-        const url = await getDownloadURL(imageRef);
-        // const month = imageRef.name.slice(0, 7);
-
-        const dataArray = imageRef.name.split(":");
-
-        const email = dataArray[0];
-        const year = parseInt(dataArray[2], 10);
-        const month =
-          parseInt(dataArray[1], 10).toString() + "/" + year.toString();
-        const amount = parseFloat(dataArray[3]);
-
-        if (!urlsByMonth[month]) {
-          urlsByMonth[month] = [];
-        }
-
-        var obj = {
-          email: email,
-          month: month,
-          year: year,
-          amount: amount,
-          url: url,
-        };
-
-        urlsByMonth[month].push(obj);
-      }
-      dispatch(setImages(urlsByMonth));
-    } catch (error) {
-      console.error("Error fetching images:", error);
-    }
   };
 
   useLayoutEffect(() => {
@@ -86,15 +50,25 @@ const LoginScreen = ({ navigation }) => {
     });
   }, [navigation]);
 
+
   useEffect(() => {
+
     const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-      if (authUser) {
-        navigation.replace("Users");
+      try {
+        if (authUser) {
+          navigation.replace("Users");
+        } else {
+          // reset the states when user logs out
+          setEmail("");
+          setPassword("");
+        }
+      } catch (error) {
+        console.log('eba si maikata');
       }
     });
 
     return unsubscribe;
-  });
+  }, [navigation]);
 
   return (
     <KeyboardAvoidingView style={styles.container}>
@@ -108,7 +82,7 @@ const LoginScreen = ({ navigation }) => {
           placeholderTextColor="#424242"
           style={styles.input}
           keyboardType="email-address"
-          value={email}
+          value={userEmail}
           onChangeText={(text) => setEmail(text)}
         />
         <View style={styles.passwordContainer}>
@@ -188,7 +162,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderColor: "#2196F3",
     borderWidth: 1,
-    fontFamily: "Roboto",
     color: "#424242",
     textAlign: "center",
     height: 40,

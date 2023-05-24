@@ -25,34 +25,6 @@ const HomeScreen = ({ navigation }) => {
             // Upload the image to Firebase Storage
             // uploadImageToFirebase(result.assets[0].uri);
             setPickedImage(result.assets[0].uri);
-            console.log(pickedImage);
-        }
-    };
-
-    const uploadImageToFirebase = async (uri) => {
-        try {
-            const response = await fetch(uri);
-            const blob = await response.blob();
-            const filename = `${auth?.currentUser.displayName}` + '.jpg'; // You can customize the file name here
-            const storageRef = ref(storage, `images/${filename}`);
-            const uploadTask = uploadBytesResumable(storageRef, blob);
-
-            uploadTask.on(
-                'state_changed',
-                (snapshot) => {
-                    // You can add a progress indicator here if you want
-                },
-                (error) => {
-                    console.error('Error uploading image:', error);
-                },
-                async () => {
-                    // Get the download URL of the uploaded image
-                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    console.log('File available at:', downloadURL);
-                }
-            );
-        } catch (error) {
-            console.error('Error uploading image:', error);
         }
     };
 
@@ -84,7 +56,6 @@ const HomeScreen = ({ navigation }) => {
                             resizeMode="contain"
                         />
                     )}
-
                     
                 </View>
             </ScrollView>

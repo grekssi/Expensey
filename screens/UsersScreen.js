@@ -6,21 +6,39 @@ import {
   Image,
   Dimensions,
   StyleSheet,
+  Modal,
+  Button,
 } from "react-native";
 import { auth, db, storage } from "../firebase";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectUserEmails } from "../features/imagesSlice";
 import { TouchableOpacity } from "react-native";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { ActivityIndicator } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
+import QRCode from "react-native-qrcode-svg";
+import { Camera } from 'expo-camera';
+import { getEmails, setEmails } from "../features/emailsSlice";
+
+const windowWidth = Dimensions.get('window').width;
 
 const UsersScreen = ({ navigation }) => {
-  const userID = auth.currentUser.email;
+  const dispatch = useDispatch();
+  const userID = auth?.currentUser?.email;
+  const emails = useSelector((state) => getEmails(state));
+
   const [accessUsers, setAccessUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isScannerVisible, setIsScannerVisible] = useState(false);
+  const [isvisible, setIsvisible] = useState(false);
+  const [jwtToken, setJwtToken] = useState("");
 
+  useEffect(() => {
+    // This will update the navigation options dynamically.
+    navigation.setOptions({
+      headerShown: !isScannerVisible,
+    });
+  }, [isScannerVisible]);
 
   const handleBarCodeScanned = ({ type, data }) => {
     setIsScannerVisible(false);
@@ -33,65 +51,86 @@ const UsersScreen = ({ navigation }) => {
     const userAccessCol = collection(db, "UserAccess");
 
     // Set the "AccessUser" and "ParentUser" fields of the document
-    console.log(qrUserEmail);
-    console.log(auth.currentUser.email);
-
     const docRef = await addDoc(userAccessCol, {
-        AccessUser: qrUserEmail,
-        ParentUser: auth.currentUser.email
+      AccessUser: qrUserEmail,
+      ParentUser: auth?.currentUser?.email
+    });
+  }
+
+
+  const fetchData = async () => {
+    const userAccessQuery = query(
+      collection(db, "UserAccess"),
+      where("ParentUser", "==", userID)
+    );
+    const querySnapshot = await getDocs(userAccessQuery);
+    const parents = [];
+    querySnapshot.forEach((doc) => {
+      parents.push(doc.data().AccessUser);
     });
 
-    console.log("Document written with ID: ", docRef.id);
-}
+    if (parents.length === 0) {
+      setLoading(false);
+    }
+
+    dispatch(setEmails(parents));
+  };
 
 
-const fetchData = async () => {
-  const userAccessQuery = query(
-    collection(db, "UserAccess"),
-    where("ParentUser", "==", userID)
-  );
-  const querySnapshot = await getDocs(userAccessQuery);
-    console.log("fetching")
-  const parents = [];
-  querySnapshot.forEach((doc) => {
-    parents.push(doc.data().AccessUser);
-  });
 
-  if (parents.length === 0) {
-    setLoading(false);
-  }
-  setAccessUsers(parents);
-};
-
+  let jwt = userID + "//" + jwtToken;
 
   useEffect(() => {
     fetchData();
+    getJwtToken();
+    console.log(jwt);
   }, []);
 
   const onLayoutHandler = () => {
     setLoading(false);
   };
 
-  const userEmails = useSelector((state) =>
-    selectUserEmails(state, accessUsers)
-  );
+  async function getCameraPermission() {
+    const { status } = await Camera.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need camera permissions to make this work!');
+      return false;
+    }
+    return true;
+  }
+
+  function getJwtToken() {
+    auth.currentUser.getIdToken(true).then(function (idToken) {
+      setJwtToken(idToken);
+    }).catch(function (error) {
+      console.log("Error fetching jwt token")
+    });
+  }
 
   return (
     <>
+      <TouchableOpacity
+        style={[styles.userContainer, { backgroundColor: 'lightgray', marginHorizontal: 10, marginTop: 20 }]}
+        onPress={() => navigation.navigate("Images", { email: auth?.currentUser?.email })}
+      >
+        <Text style={styles.userEmail}>Show My Images</Text>
+      </TouchableOpacity>
+
       <ScrollView contentContainerStyle={styles.scrollView}>
-        {userEmails.map((email, index) => (
+        {emails.emails.map((email, index) => (
           <TouchableOpacity
             key={index}
             style={styles.userContainer}
             onPress={() => navigation.navigate("Images", { email })}
             onLayout={
-              index === userEmails.length - 1 ? onLayoutHandler : undefined
+              index === emails.emails.length - 1 ? onLayoutHandler : undefined
             }
           >
             <Text style={styles.userEmail}>{email}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
+
       {loading && (
         <View style={styles.backgroundButton}>
           <ActivityIndicator
@@ -101,12 +140,58 @@ const fetchData = async () => {
           ></ActivityIndicator>
         </View>
       )}
+
+
+
       <TouchableOpacity
         style={styles.floatingButtonWide}
-        onPress={() => setIsScannerVisible(true)} // Navigate to QRCodeScreen
+        onPress={async () => {
+          if (await getCameraPermission()) {
+            setIsScannerVisible(true);
+          }
+        }} // Navigate to QRCodeScreen
       >
         <Text style={styles.wideButtonText}>Scan QR Code</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.floatingButtonqr}
+        onPress={() => setIsvisible(true)}
+      >
+        <Text style={styles.wideButtonText}>QR</Text>
+      </TouchableOpacity>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isvisible}
+        onRequestClose={() => setIsvisible(false)}
+      >
+        <TouchableOpacity
+          activeOpacity={1} // To prevent the opacity change when pressing
+          style={styles.backdrop}
+          onPress={() => setIsvisible(false)}
+        >
+          <View style={styles.centeredView}>
+            <TouchableOpacity
+              activeOpacity={1} // To prevent the opacity change when pressing
+              onPress={() => { }} // Empty function to prevent propagation of onPress to the backdrop
+            >
+              <View style={styles.modalView}>
+                {isvisible && (
+                  <Image
+                    source={{
+                      uri: `http://api.qrserver.com/v1/create-qr-code/?data=${jwt}&size=${windowWidth}x${windowWidth}`,
+                    }}
+                    style={{ width: windowWidth - 100, height: windowWidth - 100 }}
+                  />
+                )}
+              </View>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       <TouchableOpacity
         style={styles.floatingButton}
         onPress={() => navigation.navigate("ImagePicker")}
@@ -115,16 +200,36 @@ const fetchData = async () => {
       </TouchableOpacity>
 
       {isScannerVisible && (
-        <BarCodeScanner
-          onBarCodeScanned={handleBarCodeScanned}
-          style={StyleSheet.absoluteFillObject}
-        />
+        <View style={styles.scannerContainer}>
+          <BarCodeScanner
+            onBarCodeScanned={handleBarCodeScanned}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={styles.buttonContainer}>
+            <Button title="Close Camera" onPress={() => setIsScannerVisible(false)} color="#0000" />
+          </View>
+        </View>
       )}
     </>
   );
 };
 
 const styles = StyleSheet.create({
+  scannerContainer: {
+    flex: 1,
+    backgroundColor: 'black',
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    justifyContent: 'flex-end',
+  },
+  buttonContainer: {
+    backgroundColor: 'transparent',
+    marginBottom: 20,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '80%',
+  },
   activityIndicator: {
     top: 0,
     bottom: 0,
@@ -145,7 +250,6 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   scrollView: {
-    paddingTop: 50,
     flexGrow: 1,
     padding: 16,
     backgroundColor: "#F3F3F3",
@@ -168,7 +272,6 @@ const styles = StyleSheet.create({
   userEmail: {
     fontSize: 18,
     fontWeight: "bold",
-    fontFamily: "Roboto",
     color: "#424242",
   },
   floatingButtonWide: {
@@ -178,6 +281,25 @@ const styles = StyleSheet.create({
     backgroundColor: "#2196F3",
     borderRadius: 50,
     paddingHorizontal: 20,
+    height: 60,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+  },
+  floatingButtonqr: {
+    position: "absolute",
+    bottom: 20,
+    right: 100,
+    backgroundColor: "#2196F3",
+    borderRadius: 50,
+    width: 60,
     height: 60,
     alignItems: "center",
     justifyContent: "center",
@@ -215,9 +337,33 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   wideButtonText: {
-    fontSize: 26,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#FFFFFF",
+  },
+  backdrop: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+  },
+  centeredView: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalView: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
 });
 

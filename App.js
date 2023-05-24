@@ -13,6 +13,7 @@ import LoadingScreen from "./screens/LoadingScreen";
 import { store } from "./store";
 import { Provider } from "react-redux";
 import UsersScreen from "./screens/UsersScreen";
+import { auth } from "./firebase";
 
 const Stack = createStackNavigator();
 const globalScreenOptions = {
@@ -39,7 +40,16 @@ export default function App() {
               options={{ presentation: "fullScreenModal", headerShown: false }}
             />
 
-            <Stack.Screen name="ImagePicker" component={ImagePickerScreen} />
+            <Stack.Screen name="ImagePicker" component={ImagePickerScreen} options={{
+              title: "Image Picker",
+              headerStyle: {
+                backgroundColor: "#F3F3F3",
+              },
+              headerTintColor: "#424242",
+              headerTitleStyle: {
+                fontWeight: "bold",
+              },
+            }} />
             <Stack.Screen
               name="ImageUploaded"
               component={ImageUploadedScreen}
@@ -73,7 +83,24 @@ export default function App() {
             <Stack.Screen
               name="Users"
               component={UsersScreen}
-              options={{ presentation: "fullScreenModal", headerShown: false }}
+              options={({ navigation }) => ({
+                title: "User Images",
+                headerStyle: {
+                  backgroundColor: "#F3F3F3",
+                },
+                headerTintColor: "#424242",
+                headerTitleStyle: {
+                  fontWeight: "bold",
+                },
+                headerRight: () => (
+                  <Text style={styles.logoutText} onPress={async () => {
+                    await auth.signOut();
+                    navigation.navigate("Login");
+                  }}>
+                    Logout
+                  </Text>
+                ),
+              })}
             />
           </Stack.Navigator>
         </TailwindProvider>
@@ -88,5 +115,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  },
+  logoutText: {
+    marginRight: 10,
+    color: '#424242',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
