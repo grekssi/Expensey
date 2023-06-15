@@ -41,8 +41,14 @@ const UsersScreen = ({ navigation }) => {
   }, [isScannerVisible]);
 
   const handleBarCodeScanned = ({ type, data }) => {
+
+
     setIsScannerVisible(false);
-    addUserAccess(data);
+
+    const separatedData = data.split("//")[0];
+    const email = separatedData[0]; // This will hold the email
+
+    addUserAccess(email);
 
     fetchData();
   };
@@ -83,7 +89,7 @@ const UsersScreen = ({ navigation }) => {
   useEffect(() => {
     fetchData();
     getJwtToken();
-    console.log(jwt);
+    console.log(auth?.currentUser?.uid);
   }, []);
 
   const onLayoutHandler = () => {
@@ -100,11 +106,15 @@ const UsersScreen = ({ navigation }) => {
   }
 
   function getJwtToken() {
-    auth.currentUser.getIdToken(true).then(function (idToken) {
-      setJwtToken(idToken);
-    }).catch(function (error) {
-      console.log("Error fetching jwt token")
-    });
+
+    setJwtToken(auth?.currentUser?.uid);
+
+
+    // auth.currentUser.getIdToken(true).then(function (idToken) {
+    //   setJwtToken(idToken);
+    // }).catch(function (error) {
+    //   console.log("Error fetching jwt token")
+    // });
   }
 
   return (
@@ -165,6 +175,7 @@ const UsersScreen = ({ navigation }) => {
         animationType="fade"
         transparent={true}
         visible={isvisible}
+        statusBarTranslucent
         onRequestClose={() => setIsvisible(false)}
       >
         <TouchableOpacity

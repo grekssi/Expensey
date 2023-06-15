@@ -252,8 +252,9 @@ const ImagePickerScreen = ({ navigation }) => {
 
 
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
+                statusBarTranslucent={true}
                 visible={validationModalVisible}
                 onRequestClose={() => {
                     Alert.alert('Modal has been closed.');

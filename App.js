@@ -17,9 +17,9 @@ import { auth } from "./firebase";
 
 const Stack = createStackNavigator();
 const globalScreenOptions = {
-  headerStyle: { backgroundColor: "#2C6BED" },
-  headerTitleStyle: { color: "white" },
-  headerTintColor: "white",
+  headerStyle: { backgroundColor: "black" },
+  headerTitleStyle: { color: "black" },
+  headerTintColor: "black",
 };
 
 export default function App() {
@@ -27,6 +27,7 @@ export default function App() {
     <NavigationContainer>
       <Provider store={store}>
         <TailwindProvider>
+          <StatusBar style="light" backgroundColor="#000" />
           <Stack.Navigator screenOptions={globalScreenOptions}>
             <Stack.Screen
               name="Login"
@@ -63,6 +64,9 @@ export default function App() {
                 title: "User Images",
                 headerStyle: {
                   backgroundColor: "#F3F3F3",
+                  elevation: 0,
+                  shadowOpacity: 0,
+                  borderBottomWidth: 0,
                 },
                 headerTintColor: "#424242",
                 headerTitleStyle: {
@@ -87,6 +91,9 @@ export default function App() {
                 title: "User Images",
                 headerStyle: {
                   backgroundColor: "#F3F3F3",
+                  elevation: 0,
+                  shadowOpacity: 0,
+                  borderBottomWidth: 0,
                 },
                 headerTintColor: "#424242",
                 headerTitleStyle: {

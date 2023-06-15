@@ -21,7 +21,6 @@
     "expo-image-picker": "^14.1.1",
     "expo-status-bar": "~1.4.4",
     "firebase": "^9.6.2",
-    "firebase-admin": "^11.8.0",
     "git": "^0.1.5",
     "mime": "^3.0.0",
     "nativewind": "^2.0.11",
