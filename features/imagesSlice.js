@@ -29,7 +29,7 @@ export const selectImagesByEmail = (state, email) => {
 
   Object.keys(imagesByMonth).forEach((month) => {
     const filteredImages = imagesByMonth[month].filter(
-      (image) => image.email === email
+      (image) => image.email === email && image.IsDeleted === false
     );
 
     if (filteredImages.length > 0) {

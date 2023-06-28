@@ -62,6 +62,22 @@ const ImagesScreen = ({ route, navigation }) => {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      for (let image of selectedImages) {
+        const docRef = doc(db, "UserImages", image.Id); // Make sure `image.id` is the id of the document
+        await updateDoc(docRef, { IsDeleted: true });
+      }
+      console.log("All selected images deleted.");
+    } catch (error) {
+      console.error("Error deleting document: ", error);
+    }
+    finally {
+      fetchImages();
+      setSelectedImages([]);
+    }
+  };
+
   const handleMarkAsUnpaid = async () => {
     try {
       for (let image of selectedImages) {
@@ -166,12 +182,12 @@ const ImagesScreen = ({ route, navigation }) => {
                 onPress={() => handleLongPress(image, month, index)}
                 style={[
                   styles.imageRow,
-                  selectedImages.some(selectedImage => selectedImage.url === image.url) 
+                  selectedImages.some(selectedImage => selectedImage.url === image.url)
                     ? { backgroundColor: "darkgray" }
                     : image.IsPaid === "paid"
-                      ? { backgroundColor: "rgba(56,209,0,0.6)" } 
+                      ? { backgroundColor: "rgba(56,209,0,0.6)" }
                       : image.IsPaid === "unpaid"
-                        ? { }
+                        ? {}
                         : {}
                 ]}
               >
@@ -232,6 +248,15 @@ const ImagesScreen = ({ route, navigation }) => {
           onPress={handleMarkAsUnpaid}>
           <Text style={styles.footerSelectedTextContainer}>
             Mark Unpaid
+          </Text>
+        </TouchableOpacity>
+      )}
+
+      {selectedImages.length > 0 && (
+        <TouchableOpacity style={styles.footerSetDeleted}
+          onPress={handleDelete}>
+          <Text style={styles.footerSelectedTextContainer}>
+            Delete
           </Text>
         </TouchableOpacity>
       )}
@@ -358,6 +383,20 @@ const styles = StyleSheet.create({
   footerSetUnPaid: {
     position: 'absolute',
     bottom: 100,
+    left: 30,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    zIndex: 1,
+    backgroundColor: 'rgba(225,0,0,0.6)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    flexDirection: 'row',
+  },
+  footerSetDeleted: {
+    position: 'absolute',
+    bottom: 50,
     left: 30,
     justifyContent: 'flex-start',
     alignItems: 'center',

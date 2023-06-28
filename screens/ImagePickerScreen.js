@@ -83,7 +83,8 @@ const ImagePickerScreen = ({ navigation }) => {
             Date: date,
             Amount: amount,
             ImageUrl: imageUrl,
-            IsPaid: isPaid
+            IsPaid: isPaid,
+            IsDeleted: false
         };
 
         try {
@@ -123,7 +124,7 @@ const ImagePickerScreen = ({ navigation }) => {
                         // You can add a progress indicator here if you want
                     },
                     (error) => {
-                        console.error('Error uploading image:', error);
+                        console.error('Error fetching downloadURL', error);
                         reject(error);
                     },
                     async () => {

@@ -1,4 +1,4 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, StackActions } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
@@ -29,6 +29,7 @@ export default function App() {
         <TailwindProvider>
           <StatusBar style="light" backgroundColor="#000" />
           <Stack.Navigator screenOptions={globalScreenOptions}>
+
             <Stack.Screen
               name="Login"
               component={LoginScreen}
@@ -102,7 +103,7 @@ export default function App() {
                 headerRight: () => (
                   <Text style={styles.logoutText} onPress={async () => {
                     await auth.signOut();
-                    navigation.navigate("Login");
+                    navigation.replace("Login");
                   }}>
                     Logout
                   </Text>

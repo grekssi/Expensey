@@ -42,7 +42,7 @@ const UsersScreen = ({ navigation }) => {
 
   const handleBarCodeScanned = ({ type, data }) => {
 
-
+    setLoading(false);
     setIsScannerVisible(false);
 
     const separatedData = data.split("//")[0];
@@ -156,6 +156,8 @@ const UsersScreen = ({ navigation }) => {
       <TouchableOpacity
         style={styles.floatingButtonWide}
         onPress={async () => {
+          setLoading(true);
+
           if (await getCameraPermission()) {
             setIsScannerVisible(true);
           }
@@ -217,7 +219,7 @@ const UsersScreen = ({ navigation }) => {
             style={StyleSheet.absoluteFillObject}
           />
           <View style={styles.buttonContainer}>
-            <Button title="Close Camera" onPress={() => setIsScannerVisible(false)} color="#0000" />
+            <Button title="Close Camera" onPress={() => {setIsScannerVisible(false); setLoading(false)}} color="#0000" />
           </View>
         </View>
       )}
@@ -254,7 +256,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     top: 0,
-    backgroundColor: "#b4b4b4",
+    backgroundColor: 'rgba(52, 52, 52, 0.5)',
     paddingHorizontal: 20,
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
