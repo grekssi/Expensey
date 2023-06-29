@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { auth } from "../firebase";
 
 const emailsSlice = createSlice({
-  name: "images",
+  name: "emails",
   initialState: {
     emails: [],
   },
@@ -15,7 +15,6 @@ const emailsSlice = createSlice({
 });
 
 export const { setEmails } = emailsSlice.actions;
-export const selectImages = (state) => state.images.emails;
 
 export const getEmails = (state) => {
   const allEmails = state.emails;

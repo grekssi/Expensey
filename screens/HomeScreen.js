@@ -23,7 +23,6 @@ const HomeScreen = ({ navigation }) => {
 
         if (!result.canceled) {
             // Upload the image to Firebase Storage
-            // uploadImageToFirebase(result.assets[0].uri);
             setPickedImage(result.assets[0].uri);
         }
     };

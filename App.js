@@ -8,7 +8,6 @@ import RegisterScreen from "./screens/RegisterScreen";
 import { TailwindProvider } from "tailwindcss-react-native";
 import ImagePickerScreen from "./screens/ImagePickerScreen";
 import ImagesScreen from "./screens/ImagesScreen";
-import ImageUploadedScreen from "./screens/ImageUploadedScreen";
 import LoadingScreen from "./screens/LoadingScreen";
 import { store } from "./store";
 import { Provider } from "react-redux";
@@ -52,11 +51,6 @@ export default function App() {
                 fontWeight: "bold",
               },
             }} />
-            <Stack.Screen
-              name="ImageUploaded"
-              component={ImageUploadedScreen}
-              options={{ presentation: "fullScreenModal", headerShown: false }}
-            />
 
             <Stack.Screen
               name="Images"

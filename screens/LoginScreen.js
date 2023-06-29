@@ -1,38 +1,21 @@
 import {
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { Button, Input, Image } from "react-native-elements";
-import { StatusBar } from "expo-status-bar";
+import { Button, Image } from "react-native-elements";
 import { KeyboardAvoidingView } from "react-native";
-import { auth, db, storage } from "../firebase";
+import { auth } from "../firebase";
 import { FontAwesome } from "@expo/vector-icons";
-import * as Animatable from "react-native-animatable"
 
 import {
   onAuthStateChanged,
-  setPersistence,
   signInWithEmailAndPassword,
-  browserLocalPersistence,
-  inMemoryPersistence,
-  indexedDBLocalPersistence,
 } from "firebase/auth";
-import { useDispatch, useSelector } from "react-redux";
-import { getDownloadURL, listAll, ref } from "firebase/storage";
-import {
-  selectImages,
-  selectUserEmails,
-  setImages,
-} from "../features/imagesSlice";
-import { collection, getDocs, query } from "firebase/firestore";
-import { verifyIdToken } from "firebase/auth";
 
 const LoginScreen = ({ navigation }) => {
-  const dispatch = useDispatch();
   const [userEmail, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -63,7 +46,7 @@ const LoginScreen = ({ navigation }) => {
           setPassword("");
         }
       } catch (error) {
-        console.log('eba si maikata');
+        console.log(error);
       }
     });
 

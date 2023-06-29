@@ -12,13 +12,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectImagesByEmail } from "../features/imagesSlice";
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
+import { collection, doc, getDocs, or, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import {
-  selectImages,
-  selectUserEmails,
-  setImages,
-} from "../features/imagesSlice";
+import { setImages } from "../features/imagesSlice";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -29,8 +25,6 @@ const getTotalAmount = (images) => {
 const ImagesScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
   const email = route.params.email;
-
-  console.log(email);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalImage, setModalImage] = useState([]);
@@ -96,7 +90,7 @@ const ImagesScreen = ({ route, navigation }) => {
 
   const organizeData = (data) => {
     return data.reduce((acc, curr) => {
-      const { Date, Amount, Email, ImageUrl, IsPaid, Id } = curr;
+      const { Date, Amount, Email, ImageUrl, IsPaid, Id, IsDeleted } = curr;
       const amount = parseFloat(Amount);  // convert Amount to number
 
       // split Date into month and year
@@ -110,7 +104,8 @@ const ImagesScreen = ({ route, navigation }) => {
         url: ImageUrl,
         year: parseInt(year, 10),
         IsPaid: IsPaid,
-        Id: Id
+        Id: Id,
+        IsDeleted: IsDeleted
       };
 
       // check if Date exists in accumulator
@@ -131,11 +126,11 @@ const ImagesScreen = ({ route, navigation }) => {
     const userImagesCol = collection(db, 'UserImages');
     const userImagesSnapshot = await getDocs(userImagesCol);
     const userImages = userImagesSnapshot.docs.map(doc => ({ ...doc.data(), Id: doc.id }));
+
     return userImages;
   }
 
   const fetchImages = async () => {
-    console.log("fetching");
     try {
       fetchUserImages()
         .then(userImages => {
@@ -162,7 +157,6 @@ const ImagesScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     fetchImages();
-    console.log("fetching effect")
   }, []);
 
   return (

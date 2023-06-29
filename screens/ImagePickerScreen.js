@@ -102,6 +102,24 @@ const ImagePickerScreen = ({ navigation }) => {
         return `${month < 10 ? '0' : ''}${month}/${year}`; // padding zero if month < 10
     };
 
+    const getTextFromImage = (imageUrl) => {
+        var myHeaders = new Headers();
+        myHeaders.append("apikey", "5oSPT6ti9JJg0OI5fnUpncoRyhP1faZS");
+
+        var requestOptions = {
+            method: 'GET',
+            redirect: 'follow',
+            headers: myHeaders
+        };
+
+        console.log(imageUrl);
+
+        fetch(imageUrl, requestOptions)
+            .then(response => response.text())
+            .then(result => console.log(result))
+            .catch(error => console.log('error', error));
+    }
+
 
     const uploadImageToFirebase = async () => {
         try {
@@ -135,6 +153,8 @@ const ImagePickerScreen = ({ navigation }) => {
             });
 
             var date2 = getCurrentDate(date);
+
+            getTextFromImage(downloadURL);
 
             addNewDocument(auth?.currentUser.email, date2, enteredNumber, downloadURL, "none");
 

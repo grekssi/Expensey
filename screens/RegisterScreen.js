@@ -14,21 +14,20 @@ const RegisterScreen = ({ navigation }) => {
     const [password, setPassword] = useState("");
     const [imageUrl, setImageUrl] = useState("");
 
-
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerBackTitle:"Back To Login"
+            headerBackTitle: "Back To Login"
         });
     }, [navigation])
 
-    const register = () => { 
+    const register = () => {
         createUserWithEmailAndPassword(auth, email, password)
-        .then((authUser) => {
-            updateProfile(auth?.currentUser, {
-                displayName: name,
-                photoURL: "https://seeklogo.com/images/S/signal-logo-20A1616F60-seeklogo.com.png",
-            });
-        }).catch((error) => alert(error.message))
+            .then((authUser) => {
+                updateProfile(auth?.currentUser, {
+                    displayName: name,
+                    photoURL: "https://seeklogo.com/images/S/signal-logo-20A1616F60-seeklogo.com.png",
+                });
+            }).catch((error) => alert(error.message))
 
     };
 
