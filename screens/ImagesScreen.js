@@ -17,14 +17,19 @@ import { db } from "../firebase";
 import { setImages } from "../features/imagesSlice";
 
 const windowWidth = Dimensions.get("window").width;
-
 const getTotalAmount = (images) => {
-  return images.reduce((total, image) => total + image.amount, 0);
+  return images.reduce((total, image) => Math.round((total + image.amount) * 100) / 100, 0);
 };
 
 const ImagesScreen = ({ route, navigation }) => {
-  const dispatch = useDispatch();
+
   const email = route.params.email;
+
+  navigation.setOptions({
+    title: email
+  })
+
+  const dispatch = useDispatch();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalImage, setModalImage] = useState([]);
@@ -35,7 +40,7 @@ const ImagesScreen = ({ route, navigation }) => {
   const handleLongPress = (image, month, index) => {
     if (selectedImages.some(selectedImage => selectedImage.url === image.url)) {
       setSelectedImages(selectedImages.filter(selectedImage => selectedImage.url !== image.url));
-    } else { // Otherwise, select the image
+    } else {
       setSelectedImages([...selectedImages, image]);
     }
   };
@@ -92,11 +97,8 @@ const ImagesScreen = ({ route, navigation }) => {
     return data.reduce((acc, curr) => {
       const { Date, Amount, Email, ImageUrl, IsPaid, Id, IsDeleted } = curr;
       const amount = parseFloat(Amount);  // convert Amount to number
-
-      // split Date into month and year
       const [month, year] = Date.split('/');
 
-      // define the new structure
       const newData = {
         amount,
         email: Email,
@@ -108,16 +110,12 @@ const ImagesScreen = ({ route, navigation }) => {
         IsDeleted: IsDeleted
       };
 
-      // check if Date exists in accumulator
       if (!acc[Date]) {
-        // if it does not exist, create a new array
         acc[Date] = [newData];
       } else {
-        // if it exists, push the new data into the array
         acc[Date].push(newData);
       }
 
-      // return the accumulator for the next iteration
       return acc;
     }, {});
   };
@@ -229,41 +227,49 @@ const ImagesScreen = ({ route, navigation }) => {
       </ScrollView>
 
       {selectedImages.length > 0 && (
-        <TouchableOpacity style={styles.footerSetPaid}
-          onPress={handleMarkAsPaid}>
-          <Text style={styles.footerSelectedTextContainer}>
-            Mark Paid
-          </Text>
-        </TouchableOpacity>
-      )}
-
-      {selectedImages.length > 0 && (
-        <TouchableOpacity style={styles.footerSetUnPaid}
-          onPress={handleMarkAsUnpaid}>
-          <Text style={styles.footerSelectedTextContainer}>
-            Mark Unpaid
-          </Text>
-        </TouchableOpacity>
-      )}
-
-      {selectedImages.length > 0 && (
-        <TouchableOpacity style={styles.footerSetDeleted}
-          onPress={handleDelete}>
-          <Text style={styles.footerSelectedTextContainer}>
-            Delete
-          </Text>
-        </TouchableOpacity>
-      )}
+        <View style={styles.floatingFooter}>
 
 
-      {selectedImages.length > 0 && (
-        <View style={styles.footerView}>
-          <Text style={styles.footerSelectedTextContainer}>
-            {selectedImages.length} item(s) selected
-          </Text>
+          <TouchableOpacity
+            style={styles.footerSetPaid}
+            onPress={handleMarkAsPaid}>
+            <Image
+              style={styles.footerImage}
+              source={require("../assets/checkmark_white.png")}>
+            </Image>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.footerSetUnPaid}
+            onPress={handleMarkAsUnpaid}>
+            <Image
+              style={styles.footerImage}
+              source={require("../assets/Xbutton_white.png")}>
+            </Image>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.footerSetDeleted}
+            onPress={handleDelete}>
+            <Image
+              style={styles.footerImageTrash}
+              source={require("../assets/trash_white.png")}>
+            </Image>
+          </TouchableOpacity>
+
+          <View style={styles.footerView}>
+            <Text style={styles.footerSelectedTextContainer}>
+              {selectedImages.length} item(s) selected
+            </Text>
+          </View>
         </View>
       )}
+
+
+
     </View>
+
+
   );
 };
 
@@ -349,12 +355,11 @@ const styles = StyleSheet.create({
   },
   footerView: {
     position: 'absolute',
-    bottom: 50,
+    bottom: 15,
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
-    zIndex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    left: 10,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
@@ -362,44 +367,38 @@ const styles = StyleSheet.create({
   },
   footerSetPaid: {
     position: 'absolute',
-    bottom: 100,
-    right: 30,
-    justifyContent: 'flex-end',
+    bottom: 7,
+    right: 10,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
     alignItems: 'center',
-    alignSelf: 'flex-end',
-    zIndex: 1,
-    backgroundColor: 'rgba(56,209,0,0.6)',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
+    backgroundColor: 'lightgray',
+    borderRadius: 5,
     flexDirection: 'row',
   },
   footerSetUnPaid: {
     position: 'absolute',
-    bottom: 100,
-    left: 30,
-    justifyContent: 'flex-start',
+    bottom: 7,
+    right: 70,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    zIndex: 1,
-    backgroundColor: 'rgba(225,0,0,0.6)',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
+    backgroundColor: 'lightgray',
+    borderRadius: 5,
     flexDirection: 'row',
   },
   footerSetDeleted: {
     position: 'absolute',
-    bottom: 50,
-    left: 30,
-    justifyContent: 'flex-start',
+    bottom: 7,
+    right: 130,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    zIndex: 1,
-    backgroundColor: 'rgba(225,0,0,0.6)',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
+    backgroundColor: 'lightgray',
+    borderRadius: 5,
     flexDirection: 'row',
   },
   textContainer: {
@@ -413,19 +412,45 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   footerSelectedTextContainer: {
-    backgroundColor: 'rgba(0,0,0,0)',
     borderRadius: 5,
-    color: 'white'
+    color: 'black',
+    fontSize: 18,
+    fontWeight: "bold",
   },
   container: {
     flex: 1,
   },
-  footerContainer: {
-    padding: 16,
-    backgroundColor: "#FFFFFF",
+  floatingFooter: {
+    position: "absolute",
+    bottom: 0,
+    backgroundColor: "white",
+    width: windowWidth,
+    height: 70,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    borderTopColor: "lightgray",
     borderTopWidth: 1,
-    borderColor: "#E0E0E0",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
+  footerImage: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 50,
+    width: 50,
+  },
+  footerImageTrash: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 30,
+    width: 30,
+  }
 });
 
 export default ImagesScreen;

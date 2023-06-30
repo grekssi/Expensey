@@ -154,8 +154,6 @@ const ImagePickerScreen = ({ navigation }) => {
 
             var date2 = getCurrentDate(date);
 
-            getTextFromImage(downloadURL);
-
             addNewDocument(auth?.currentUser.email, date2, enteredNumber, downloadURL, "none");
 
         } catch (error) {
@@ -271,7 +269,6 @@ const ImagePickerScreen = ({ navigation }) => {
                 </View>
             )}
 
-
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -283,7 +280,6 @@ const ImagePickerScreen = ({ navigation }) => {
                 <View style={styles.centeredView}>
                     <View style={styles.validationModalView}>
                         <Text style={styles.modalText}>Both image and amount must be filled!</Text>
-
                         <TouchableHighlight
                             style={{ ...styles.openButton, backgroundColor: '#2196F3' }}
                             onPress={() => {

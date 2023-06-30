@@ -55,7 +55,6 @@ const HomeScreen = ({ navigation }) => {
                             resizeMode="contain"
                         />
                     )}
-                    
                 </View>
             </ScrollView>
             <Button title="Pick an image" onPress={pickImage}/>

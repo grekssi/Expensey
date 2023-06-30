@@ -19,6 +19,7 @@ import { BarCodeScanner } from "expo-barcode-scanner";
 import QRCode from "react-native-qrcode-svg";
 import { Camera } from 'expo-camera';
 import { getEmails, setEmails } from "../features/emailsSlice";
+import EmailItem from "../components/EmailItem";
 
 const windowWidth = Dimensions.get('window').width;
 
@@ -106,39 +107,30 @@ const UsersScreen = ({ navigation }) => {
   }
 
   function getJwtToken() {
-
     setJwtToken(auth?.currentUser?.uid);
-
-
-    // auth.currentUser.getIdToken(true).then(function (idToken) {
-    //   setJwtToken(idToken);
-    // }).catch(function (error) {
-    //   console.log("Error fetching jwt token")
-    // });
   }
 
   return (
     <>
       <TouchableOpacity
         style={[styles.userContainer, { backgroundColor: 'lightgray', marginHorizontal: 10, marginTop: 20 }]}
-        onPress={() => navigation.navigate("Images", { email: auth?.currentUser?.email })}
+        onPress={() => navigation.navigate("Images", { email: auth?.currentUser?.email, navigation })}
       >
         <Text style={styles.userEmail}>Show My Images</Text>
       </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.scrollView}>
         {emails.emails.map((email, index) => (
-          <TouchableOpacity
+          <EmailItem
             key={index}
-            style={styles.userContainer}
-            onPress={() => navigation.navigate("Images", { email })}
-            onLayout={
-              index === emails.emails.length - 1 ? onLayoutHandler : undefined
-            }
-          >
-            <Text style={styles.userEmail}>{email}</Text>
-          </TouchableOpacity>
+            email={email}
+            index={index}
+            navigation={navigation}
+            onLayoutHandler={onLayoutHandler}
+            emailsLength={emails.emails.length}
+          />
         ))}
+
       </ScrollView>
 
       {loading && (
@@ -152,6 +144,9 @@ const UsersScreen = ({ navigation }) => {
       )}
 
 
+      <View style={styles.floatingFooter}>
+
+      </View>
 
       <TouchableOpacity
         style={styles.floatingButtonWide}
@@ -163,7 +158,7 @@ const UsersScreen = ({ navigation }) => {
           }
         }} // Navigate to QRCodeScreen
       >
-        <Text style={styles.wideButtonText}>Scan QR Code</Text>
+        <Text style={styles.wideButtonText}>Scan QR</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -172,6 +167,25 @@ const UsersScreen = ({ navigation }) => {
       >
         <Text style={styles.wideButtonText}>QR</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.floatingButton}
+        onPress={() => navigation.navigate("ImagePicker")}
+      >
+        <Text style={styles.buttonText}>+</Text>
+      </TouchableOpacity>
+
+      {isScannerVisible && (
+        <View style={styles.scannerContainer}>
+          <BarCodeScanner
+            onBarCodeScanned={handleBarCodeScanned}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={styles.buttonContainer}>
+            <Button title="Close Camera" onPress={() => { setIsScannerVisible(false); setLoading(false) }} color="#0000" />
+          </View>
+        </View>
+      )}
 
       <Modal
         animationType="fade"
@@ -196,7 +210,7 @@ const UsersScreen = ({ navigation }) => {
                     source={{
                       uri: `http://api.qrserver.com/v1/create-qr-code/?data=${jwt}&size=${windowWidth}x${windowWidth}`,
                     }}
-                    style={{ width: windowWidth - 100, height: windowWidth - 100 }}
+                    style={{ width: windowWidth - 200, height: windowWidth - 200 }}
                   />
                 )}
               </View>
@@ -204,25 +218,6 @@ const UsersScreen = ({ navigation }) => {
           </View>
         </TouchableOpacity>
       </Modal>
-
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={() => navigation.navigate("ImagePicker")}
-      >
-        <Text style={styles.buttonText}>+</Text>
-      </TouchableOpacity>
-
-      {isScannerVisible && (
-        <View style={styles.scannerContainer}>
-          <BarCodeScanner
-            onBarCodeScanned={handleBarCodeScanned}
-            style={StyleSheet.absoluteFillObject}
-          />
-          <View style={styles.buttonContainer}>
-            <Button title="Close Camera" onPress={() => {setIsScannerVisible(false); setLoading(false)}} color="#0000" />
-          </View>
-        </View>
-      )}
     </>
   );
 };
@@ -289,15 +284,28 @@ const styles = StyleSheet.create({
   },
   floatingButtonWide: {
     position: "absolute",
-    bottom: 20,
+    bottom: 7,
     left: 20,
-    backgroundColor: "#2196F3",
-    borderRadius: 50,
+    backgroundColor: "lightgray",
+    borderRadius: 10,
     paddingHorizontal: 20,
-    height: 60,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    borderColor: "white",
+    borderWidth: 1,
+  },
+  floatingFooter: {
+    position: "absolute",
+    bottom: 0,
+    backgroundColor: "white",
+    width: windowWidth,
+    height: 70,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
+    borderTopColor: "lightgray",
+    borderTopWidth: 1,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -307,52 +315,38 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   floatingButtonqr: {
-    position: "absolute",
-    bottom: 20,
-    right: 100,
-    backgroundColor: "#2196F3",
-    borderRadius: 50,
-    width: 60,
-    height: 60,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+    position: 'absolute',
+    bottom: 7,
+    right: 70,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'lightgray',
+    borderRadius: 5,
+    flexDirection: 'row',
   },
   floatingButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "#2196F3",
-    borderRadius: 50,
-    width: 60,
-    height: 60,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+    position: 'absolute',
+    bottom: 7,
+    right: 10,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'lightgray',
+    borderRadius: 5,
+    flexDirection: 'row',
   },
   buttonText: {
     fontSize: 36,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#424242",
   },
   wideButtonText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#424242",
   },
   backdrop: {
     flex: 1,
