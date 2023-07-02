@@ -14,12 +14,6 @@ const imagesSlice = createSlice({
   },
 });
 
-const getNonEmptyDates = (filteredImagesByMonth) => {
-  return Object.keys(filteredImagesByMonth).filter(
-    (date) => filteredImagesByMonth[date].length > 0
-  );
-};
-
 export const { setImages } = imagesSlice.actions;
 export const selectImages = (state) => state.images.imagesByMonth;
 
@@ -39,23 +33,6 @@ export const selectImagesByEmail = (state, email) => {
 
 
   return filteredImagesByMonth;
-};
-
-export const selectUserEmails = (state, parentUsers) => {
-  const imagesByMonth = state.images.imagesByMonth;
-  const userEmails = [];
-
-  Object.values(imagesByMonth).forEach((images) => {
-    images.forEach((image) => {
-      if (!userEmails.includes(image.email)) {
-        userEmails.push(image.email);
-      }
-    });
-  });
-
-  userEmails.push(auth?.currentUser?.email);
-  
-  return parentUsers;
 };
 
 export default imagesSlice.reducer;

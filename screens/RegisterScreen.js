@@ -6,6 +6,7 @@ import { Button, Text } from 'react-native-elements'
 import { auth } from '../firebase'
 import { createUserWithEmailAndPassword, updateCurrentUser } from 'firebase/auth'
 import { updateProfile } from 'firebase/auth'
+import styles from '../styles'
 
 const RegisterScreen = ({ navigation }) => {
 
@@ -25,19 +26,19 @@ const RegisterScreen = ({ navigation }) => {
             .then((authUser) => {
                 updateProfile(auth?.currentUser, {
                     displayName: name,
-                    photoURL: "https://seeklogo.com/images/S/signal-logo-20A1616F60-seeklogo.com.png",
+                    photoURL: "",
                 });
             }).catch((error) => alert(error.message))
 
     };
 
     return (
-        <KeyboardAvoidingView style={styles.container}>
+        <KeyboardAvoidingView style={styles.Register.container}>
             <StatusBar style='light' />
 
-            <Text h3 style={{ marginBottom: 50 }}>Create a Signal account</Text>
+            <Text h3 style={{ marginBottom: 50 }}>Create an Expensey account</Text>
 
-            <View style={styles.inputContainer}>
+            <View style={styles.Register.inputContainer}>
                 <Input
                     placeholder='Full Name'
                     type="text"
@@ -65,27 +66,9 @@ const RegisterScreen = ({ navigation }) => {
                     onSubmitEditing={register} />
             </View>
 
-            <Button containerStyle={styles.button} raised onPress={register} title="Register" />
+            <Button containerStyle={styles.Register.button} raised onPress={register} title="Register" />
         </KeyboardAvoidingView>
     )
 }
 
 export default RegisterScreen
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 10,
-        backgroundColor: "white"
-    },
-    button: {
-        width: 200,
-        marginTop: 10
-    },
-    inputContainer: {
-        width: 300
-    },
-
-})

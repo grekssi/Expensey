@@ -8,7 +8,6 @@ import RegisterScreen from "./screens/RegisterScreen";
 import { TailwindProvider } from "tailwindcss-react-native";
 import ImagePickerScreen from "./screens/ImagePickerScreen";
 import ImagesScreen from "./screens/ImagesScreen";
-import LoadingScreen from "./screens/LoadingScreen";
 import { store } from "./store";
 import { Provider } from "react-redux";
 import UsersScreen from "./screens/UsersScreen";
@@ -32,12 +31,6 @@ export default function App() {
             <Stack.Screen
               name="Login"
               component={LoginScreen}
-              options={{ presentation: "fullScreenModal", headerShown: false }}
-            />
-
-            <Stack.Screen
-              name="Loading"
-              component={LoadingScreen}
               options={{ presentation: "fullScreenModal", headerShown: false }}
             />
 

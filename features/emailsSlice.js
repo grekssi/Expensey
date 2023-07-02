@@ -11,14 +11,17 @@ const emailsSlice = createSlice({
     setEmails: (state, action) => {
       state.emails = action.payload;
     },
+    removeEmail: (state, action) => {
+      const emailToRemove = action.payload;
+      state.emails = state.emails.filter(email => email !== emailToRemove);
+    },
   },
 });
 
-export const { setEmails } = emailsSlice.actions;
+export const { setEmails, removeEmail } = emailsSlice.actions;
 
 export const getEmails = (state) => {
   const allEmails = state.emails;
-
   return allEmails;
 };
 

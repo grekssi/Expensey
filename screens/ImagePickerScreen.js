@@ -1,6 +1,5 @@
 import { Alert, Dimensions, Image, Modal, StyleSheet, Text, TextInput, TouchableHighlight, TouchableOpacity, View } from 'react-native'
 import React, { useLayoutEffect, useState } from 'react'
-import { ScrollView } from 'react-native'
 import { auth, storage } from '../firebase'
 import * as ImagePicker from 'expo-image-picker'
 import { getDownloadURL, getStorage, ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
@@ -9,9 +8,8 @@ import { addDoc, collection, doc, getFirestore, setDoc } from 'firebase/firestor
 import * as Animatable from "react-native-animatable"
 import { useEffect } from 'react'
 import { useNavigation } from '@react-navigation/native'
+import styles from '../styles'
 
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
 const monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
 ];
@@ -22,9 +20,7 @@ const ImagePickerScreen = ({ navigation }) => {
     const [pickedImage, setPickedImage] = useState(null);
     const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
-
     const [isUploading, setIsUploading] = useState(false);
-
     const [modalVisible, setModalVisible] = useState(false);
     const [textFieldValue, setTextFieldValue] = useState('');
     const [validationModalVisible, setValidationModalVisible] = useState(false);
@@ -161,7 +157,6 @@ const ImagePickerScreen = ({ navigation }) => {
         }
     };
 
-
     const handleSubmit = () => {
         const inputNumber = parseFloat(textFieldValue);
         if (inputNumber <= 99.99) {
@@ -174,18 +169,18 @@ const ImagePickerScreen = ({ navigation }) => {
     };
 
     return (
-        <View style={styles.scrollViewContainer}>
+        <View style={styles.ImagePicker.scrollViewContainer}>
             <Modal
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <View style={styles.overlay} />
-                <View style={styles.modalView}>
-                    <Text style={styles.modalTitle}>Enter a Number</Text>
+                <View style={styles.ImagePicker.overlay} />
+                <View style={styles.ImagePicker.modalView}>
+                    <Text style={styles.ImagePicker.modalTitle}>Enter a Number</Text>
                     <TextInput
-                        style={styles.textInput}
+                        style={styles.ImagePicker.textInput}
                         onChangeText={(text) => setTextFieldValue(text)}
                         value={textFieldValue}
                         keyboardType="numeric"
@@ -193,17 +188,17 @@ const ImagePickerScreen = ({ navigation }) => {
                         maxLength={5}
                     />
                     <TouchableOpacity
-                        style={styles.submitButton}
+                        style={styles.ImagePicker.submitButton}
                         onPress={handleSubmit}
                     >
-                        <Text style={styles.submitButtonText}>Submit</Text>
+                        <Text style={styles.ImagePicker.submitButtonText}>Submit</Text>
                     </TouchableOpacity>
                 </View>
             </Modal>
 
             <View>
                 <View className="flex-col">
-                    <View style={styles.imageContainer}>
+                    <View style={styles.ImagePicker.imageContainer}>
                         {pickedImage && (
                             <Image
                                 source={{ uri: pickedImage }}
@@ -228,31 +223,31 @@ const ImagePickerScreen = ({ navigation }) => {
 
             {!isUploading && (
                 <View className="flex-col space-y-3 items-center mb-5">
-                    <View style={styles.monthContainer}>
-                        <View style={styles.imageRow}>
+                    <View style={styles.ImagePicker.monthContainer}>
+                        <View style={styles.ImagePicker.imageRow}>
                             <Text className="text-lg font-bold text-gray-700">Date : {monthNames[date.getMonth()]} {date.getFullYear()}</Text>
                         </View>
-                        <View style={styles.imageRow}>
+                        <View style={styles.ImagePicker.imageRow}>
                             <Text className="text-lg font-bold text-gray-700">Amount : {enteredNumber}lv</Text>
                         </View>
                     </View>
 
-                    <TouchableOpacity onPress={pickImage} style={styles.buttonContainer}>
+                    <TouchableOpacity onPress={pickImage} style={styles.ImagePicker.buttonContainer}>
                         <Text className=" text-lg font-bold text-gray-700">Pick Image</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={showPicker} style={styles.buttonContainer}>
+                    <TouchableOpacity onPress={showPicker} style={styles.ImagePicker.buttonContainer}>
                         <Text className=" text-lg font-bold text-gray-700">Pick Date</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={showModal} style={styles.buttonContainer}>
+                    <TouchableOpacity onPress={showModal} style={styles.ImagePicker.buttonContainer}>
                         <Text className=" text-lg font-bold text-gray-700">Pick Amount</Text>
                     </TouchableOpacity>
 
 
                     <View className="mx-10 mt-10">
                         <TouchableOpacity onPress={uploadImageToFirebase} className="bg-gray-600 p-4 w-80 rounded-3xl">
-                            <Text style={styles.buttonText}>Send</Text>
+                            <Text style={styles.ImagePicker.buttonText}>Send</Text>
                         </TouchableOpacity>
                     </View>
                 </View>)}
@@ -277,15 +272,15 @@ const ImagePickerScreen = ({ navigation }) => {
                 onRequestClose={() => {
                     Alert.alert('Modal has been closed.');
                 }}>
-                <View style={styles.centeredView}>
-                    <View style={styles.validationModalView}>
-                        <Text style={styles.modalText}>Both image and amount must be filled!</Text>
+                <View style={styles.ImagePicker.centeredView}>
+                    <View style={styles.ImagePicker.validationModalView}>
+                        <Text style={styles.ImagePicker.modalText}>Both image and amount must be filled!</Text>
                         <TouchableHighlight
-                            style={{ ...styles.openButton, backgroundColor: '#2196F3' }}
+                            style={{ ...styles.ImagePicker.openButton, backgroundColor: '#2196F3' }}
                             onPress={() => {
                                 setValidationModalVisible(!validationModalVisible);
                             }}>
-                            <Text style={styles.textStyle}>Hide</Text>
+                            <Text style={styles.ImagePicker.textStyle}>Hide</Text>
                         </TouchableHighlight>
                     </View>
                 </View>
@@ -293,194 +288,5 @@ const ImagePickerScreen = ({ navigation }) => {
         </View>
     )
 }
-
-const styles = StyleSheet.create({
-    validationModalView: {
-        margin: 20,
-        backgroundColor: "white",
-        borderRadius: 20,
-        padding: 35,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5
-    },
-    imageContainer: {
-        alignSelf: 'center',
-        height: windowHeight * 0.3,
-    },
-    scrollViewContainer: {
-        flex: 1,
-        flexDirection: 'column',
-        height: windowHeight,
-        backgroundColor: '#F1F1F1',
-        justifyContent: 'space-between'
-    },
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    openModalButton: {
-        backgroundColor: '#2196F3',
-        padding: 10,
-        borderRadius: 5,
-    },
-    openModalButtonText: {
-        color: 'white',
-        fontSize: 18,
-    },
-    textInput: {
-        borderWidth: 1,
-        borderColor: 'gray',
-        width: '100%',
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        marginBottom: 15,
-    },
-    result: {
-        marginTop: 20,
-        fontSize: 18,
-    },
-    button: {
-        width: 300,
-        backgroundColor: 'gray',
-        height: 56,
-        borderRadius: 9999,
-        justifyContent: 'center',
-    },
-    buttonText: {
-        textAlign: 'center',
-        fontWeight: 'bold',
-        fontSize: 24,
-        color: 'white',
-    },
-    overlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalView: {
-        position: 'absolute',
-        backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 10,
-        alignItems: 'center',
-        alignSelf: 'center',
-        width: '80%',
-        marginTop: '50%',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    modalTitle: {
-        fontSize: 24,
-        marginBottom: 15,
-        fontWeight: 'bold',
-    },
-    textInput: {
-        borderWidth: 1,
-        borderColor: 'gray',
-        width: '100%',
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        marginBottom: 15,
-        borderRadius: 5,
-    },
-    submitButton: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderRadius: 10,
-        height: 0,
-        width: 80,
-        backgroundColor: '#2196F3',
-    },
-    submitButtonText: {
-        color: 'white',
-        fontSize: 18,
-    },
-    buttonContainer: {
-        justifyContent: 'center',
-        alignItems: "center",
-        marginHorizontal: 30,
-        backgroundColor: "#FFFFFF",
-        borderRadius: 10,
-        padding: 10,
-        width: windowWidth * 0.9,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    monthContainer: {
-        alignSelf: 'center',
-        flexDirection: 'column',
-        width: windowWidth * 0.9,
-        gap: 7,
-        justifyContent: 'center',
-        alignItems: "center",
-        backgroundColor: "#FFFFFF",
-        borderRadius: 10,
-        padding: 10,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    imageRow: {
-        width: windowWidth * 0.7, // 50% of the window width
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 4,
-        backgroundColor: "#F8F8F8",
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: "#E0E0E0",
-    },
-    image: {
-        width: windowWidth * 0.9, // 90% of the window width
-        height: windowHeight * 0.4, // 40% of the window height
-    },
-
-    openButton: {
-        width: 100,
-        backgroundColor: '#2196F3',
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
-    },
-    textStyle: {
-        color: 'white',
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    modalText: {
-        fontSize: 20,
-        marginBottom: 15,
-        textAlign: 'center',
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: 22,
-        backgroundColor: "rgba(0,0,0,0.5)" // this is the grayed-out background
-    },
-});
 
 export default ImagePickerScreen

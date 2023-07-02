@@ -6,15 +6,18 @@ import {
   Image,
   Dimensions,
   StyleSheet,
-  TouchableOpacity
+  TouchableOpacity,
+  Button
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { selectImagesByEmail } from "../features/imagesSlice";
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import { collection, doc, getDocs, or, updateDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { collection, deleteDoc, doc, getDoc, getDocs, or, query, updateDoc, where } from "firebase/firestore";
+import { auth, db } from "../firebase";
 import { setImages } from "../features/imagesSlice";
+import { removeEmail } from "../features/emailsSlice";
+import styles from "../styles";
 
 const windowWidth = Dimensions.get("window").width;
 const getTotalAmount = (images) => {
@@ -22,14 +25,51 @@ const getTotalAmount = (images) => {
 };
 
 const ImagesScreen = ({ route, navigation }) => {
-
+  const dispatch = useDispatch();
   const email = route.params.email;
+
+  useEffect(() => {
+    // Set the headerRight component
+    const headerRightComponent = () => (
+      <Text style={styles.Images.removeUserText}
+        onPress={async () => {
+
+          const userAccessQuery = query(
+            collection(db, "UserAccess"),
+            where("AccessUser", "==", email),
+            where("ParentUser", "==", auth?.currentUser?.email),
+          );
+
+          var doc1 = null;
+
+          //just in case there occurs a bug which added multiple identical emails
+          const querySnapshot = await getDocs(userAccessQuery);
+          querySnapshot.forEach(async (doc) => {
+            doc1 = doc;
+          });
+
+          var emailToRemove = doc1.data().AccessUser;
+
+          const docRef = doc(db, "UserAccess", doc1.id);
+          await deleteDoc(docRef);
+          dispatch(removeEmail(emailToRemove));
+          navigation.goBack();
+        }}>
+        Remove User
+      </Text>
+    );
+
+    // Set the options for the current screen
+    navigation.setOptions({
+      headerRight: headerRightComponent,
+    });
+  }, []);
 
   navigation.setOptions({
     title: email
   })
 
-  const dispatch = useDispatch();
+
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalImage, setModalImage] = useState([]);
@@ -158,14 +198,14 @@ const ImagesScreen = ({ route, navigation }) => {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.Images.container}>
 
-      <ScrollView contentContainerStyle={styles.scrollView} key={refresh}>
+      <ScrollView contentContainerStyle={styles.Images.scrollView} key={refresh}>
         {Object.entries(
           useSelector((state) => selectImagesByEmail(state, email))
         ).map(([month, images]) => (
-          <View key={month} style={styles.monthContainer}>
-            <Text style={styles.monthTitle}>
+          <View key={month} style={styles.Images.monthContainer}>
+            <Text style={styles.Images.monthTitle}>
               {month} - {getTotalAmount(images)} Лв.
             </Text>
             {images.map((image, index) => (
@@ -173,7 +213,7 @@ const ImagesScreen = ({ route, navigation }) => {
                 key={index}
                 onPress={() => handleLongPress(image, month, index)}
                 style={[
-                  styles.imageRow,
+                  styles.Images.imageRow,
                   selectedImages.some(selectedImage => selectedImage.url === image.url)
                     ? { backgroundColor: "darkgray" }
                     : image.IsPaid === "paid"
@@ -190,9 +230,9 @@ const ImagesScreen = ({ route, navigation }) => {
                     setModalVisible(true);
                   }}
                 >
-                  <Image source={{ uri: image.url }} style={styles.image} />
+                  <Image source={{ uri: image.url }} style={styles.Images.image} />
                 </TouchableOpacity>
-                <Text style={styles.imageAmount}>{image.amount} Лв.</Text>
+                <Text style={styles.Images.imageAmount}>{image.amount} Лв.</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -203,7 +243,7 @@ const ImagesScreen = ({ route, navigation }) => {
           onRequestClose={() => setModalVisible(false)}
           style={{ margin: 0, padding: 0 }}
         >
-          <View style={styles.viewerContainer}>
+          <View style={styles.Images.viewerContainer}>
             <ImageViewer
               imageUrls={modalImage}
               enableSwipeDown={true}
@@ -216,9 +256,9 @@ const ImagesScreen = ({ route, navigation }) => {
               }}
             />
             {fotterVisible && (
-              <View style={styles.footerView}>
-                <View style={styles.textContainer}>
-                  <Text style={styles.footerText}>Swipe down to close</Text>
+              <View style={styles.Images.footerView}>
+                <View style={styles.Images.textContainer}>
+                  <Text style={styles.Images.footerText}>Swipe down to close</Text>
                 </View>
               </View>
             )}
@@ -227,230 +267,47 @@ const ImagesScreen = ({ route, navigation }) => {
       </ScrollView>
 
       {selectedImages.length > 0 && (
-        <View style={styles.floatingFooter}>
+        <View style={styles.Images.floatingFooter}>
 
 
           <TouchableOpacity
-            style={styles.footerSetPaid}
+            style={styles.Images.footerSetPaid}
             onPress={handleMarkAsPaid}>
             <Image
-              style={styles.footerImage}
+              style={styles.Images.footerImage}
               source={require("../assets/checkmark_white.png")}>
             </Image>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.footerSetUnPaid}
+            style={styles.Images.footerSetUnPaid}
             onPress={handleMarkAsUnpaid}>
             <Image
-              style={styles.footerImage}
+              style={styles.Images.footerImage}
               source={require("../assets/Xbutton_white.png")}>
             </Image>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.footerSetDeleted}
+            style={styles.Images.footerSetDeleted}
             onPress={handleDelete}>
             <Image
-              style={styles.footerImageTrash}
+              style={styles.Images.footerImageTrash}
               source={require("../assets/trash_white.png")}>
             </Image>
           </TouchableOpacity>
 
-          <View style={styles.footerView}>
-            <Text style={styles.footerSelectedTextContainer}>
+          <View style={styles.Images.footerView}>
+            <Text style={styles.Images.footerSelectedTextContainer}>
               {selectedImages.length} item(s) selected
             </Text>
           </View>
         </View>
       )}
-
-
-
     </View>
 
 
   );
 };
-
-const styles = StyleSheet.create({
-  scrollView: {
-    flexGrow: 1,
-    padding: 16,
-    backgroundColor: "#F3F3F3",
-  },
-  monthContainer: {
-    alignItems: "center",
-    marginBottom: 24,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  monthTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 8,
-    color: "#424242",
-  },
-  imageRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 8,
-    width: "100%",
-    padding: 8,
-    backgroundColor: "#F8F8F8",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-  },
-  image: {
-    width: windowWidth / 3,
-    height: windowWidth / 3,
-    resizeMode: "cover",
-    borderRadius: 10,
-  },
-  imageAmount: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "black",
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: 'rgba(0,0,0,0.5)',  // semi-transparent background
-  },
-  modalImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: 'contain',  // make the image fit within the screen
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 50,
-    right: 30,
-    backgroundColor: "#2196F3",
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2
-  },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center"
-  },
-  viewerContainer: {
-    flex: 1,
-    margin: 0,
-  },
-  footerView: {
-    position: 'absolute',
-    bottom: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    left: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    flexDirection: 'row',
-  },
-  footerSetPaid: {
-    position: 'absolute',
-    bottom: 7,
-    right: 10,
-    width: 50,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'lightgray',
-    borderRadius: 5,
-    flexDirection: 'row',
-  },
-  footerSetUnPaid: {
-    position: 'absolute',
-    bottom: 7,
-    right: 70,
-    width: 50,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'lightgray',
-    borderRadius: 5,
-    flexDirection: 'row',
-  },
-  footerSetDeleted: {
-    position: 'absolute',
-    bottom: 7,
-    right: 130,
-    width: 50,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'lightgray',
-    borderRadius: 5,
-    flexDirection: 'row',
-  },
-  textContainer: {
-    backgroundColor: 'rgba(0,0,0,0)',
-    borderRadius: 5,
-  },
-  footerText: {
-    color: 'white',
-    padding: 5,
-    flex: 1,
-    textAlign: 'center',
-  },
-  footerSelectedTextContainer: {
-    borderRadius: 5,
-    color: 'black',
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  container: {
-    flex: 1,
-  },
-  floatingFooter: {
-    position: "absolute",
-    bottom: 0,
-    backgroundColor: "white",
-    width: windowWidth,
-    height: 70,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    borderTopColor: "lightgray",
-    borderTopWidth: 1,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
-  },
-  footerImage: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: 50,
-    width: 50,
-  },
-  footerImageTrash: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: 30,
-    width: 30,
-  }
-});
 
 export default ImagesScreen;

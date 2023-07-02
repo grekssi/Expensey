@@ -14,6 +14,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
+import styles from "../styles";
 
 const LoginScreen = ({ navigation }) => {
   const [userEmail, setEmail] = useState("");
@@ -54,32 +55,32 @@ const LoginScreen = ({ navigation }) => {
   }, [navigation]);
 
   return (
-    <KeyboardAvoidingView style={styles.container}>
+    <KeyboardAvoidingView style={styles.Login.container}>
       <Image
         source={require("../assets/expenseyLogo.png")}
-        style={styles.logo}
+        style={styles.Login.logo}
       />
-      <View style={styles.inputContainer}>
+      <View style={styles.Login.inputContainer}>
         <TextInput
           placeholder="Email"
           placeholderTextColor="#424242"
-          style={styles.input}
+          style={styles.Login.input}
           keyboardType="email-address"
           value={userEmail}
           onChangeText={(text) => setEmail(text)}
         />
-        <View style={styles.passwordContainer}>
+        <View style={styles.Login.passwordContainer}>
           <TextInput
             placeholder="Password"
             placeholderTextColor="#424242"
-            style={styles.input}
+            style={styles.Login.input}
             secureTextEntry={!showPassword}
             value={password}
             onChangeText={(text) => setPassword(text)}
             onSubmitEditing={signIn}
           />
           <TouchableOpacity
-            style={styles.eyeIcon}
+            style={styles.Login.eyeIcon}
             onPress={() => setShowPassword(!showPassword)}
           >
             <FontAwesome
@@ -92,16 +93,16 @@ const LoginScreen = ({ navigation }) => {
       </View>
 
       <Button
-        containerStyle={styles.button}
-        buttonStyle={styles.loginButton}
-        titleStyle={styles.buttonText}
+        containerStyle={styles.Login.button}
+        buttonStyle={styles.Login.loginButton}
+        titleStyle={styles.Login.buttonText}
         onPress={signIn}
         title="Login"
       />
       <Button
-        containerStyle={styles.button}
-        buttonStyle={styles.registerButton}
-        titleStyle={styles.registerButtonText}
+        containerStyle={styles.Login.button}
+        buttonStyle={styles.Login.registerButton}
+        titleStyle={styles.Login.registerButtonText}
         onPress={() => navigation.navigate("Register")}
         type="outline"
         title="Register"
@@ -111,71 +112,3 @@ const LoginScreen = ({ navigation }) => {
 };
 
 export default LoginScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    padding: 10,
-    backgroundColor: "#F3F3F3",
-  },
-  logo: {
-    width: 180,
-    height: 180,
-    marginTop: 100
-  },
-  inputBox: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    paddingLeft: 10,
-    paddingRight: 10,
-    marginBottom: 10,
-    borderColor: "#2196F3",
-    borderWidth: 1,
-  },
-  inputContainer: {
-    width: 300,
-    marginTop: 100
-  },
-  input: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    paddingLeft: 10,
-    paddingRight: 10,
-    marginBottom: 10,
-    borderColor: "#2196F3",
-    borderWidth: 1,
-    color: "#424242",
-    textAlign: "center",
-    height: 40,
-    width: 300
-  },
-  passwordContainer: {
-    width: 300,
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  eyeIcon: {
-    marginLeft: 10,
-    marginBottom: 10
-  },
-  button: {
-    width: 200,
-    marginTop: 10,
-  },
-  loginButton: {
-    backgroundColor: "#2196F3",
-    borderRadius: 10,
-  },
-  registerButton: {
-    color: "2196F3",
-    borderColor: "#2196F3",
-    borderRadius: 10,
-    borderWidth: 2,
-  },
-  buttonText: {
-    fontWeight: "bold",
-    color: "#FFFFFF",
-  },
-});
