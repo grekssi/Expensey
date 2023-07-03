@@ -15,12 +15,10 @@ import { TouchableOpacity } from "react-native";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { ActivityIndicator } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
-import QRCode from "react-native-qrcode-svg";
 import { Camera } from 'expo-camera';
 import { getEmails, setEmails } from "../features/emailsSlice";
 import EmailItem from "../components/EmailItem";
 import ApiFetcher from "../features/ApiFetcher";
-import { useFocusEffect } from "@react-navigation/native";
 import styles from "../styles";
 
 const windowWidth = Dimensions.get('window').width;
@@ -48,20 +46,6 @@ const UsersScreen = ({ navigation }) => {
     fetchUsersFromFirebase();
     getJwtToken();
   }, []);
-
-
-  const verifyUserId = (apiKey, email) => {
-    const apiUrl = "https://expensey-backend.onrender.com/verify";
-    const requestBody = JSON.stringify({ apiKey, email });
-
-    ApiFetcher.checkUserId(apiUrl, requestBody)
-      .then(result => {
-        if (result.statusCode == "200") {
-          addUserAccess(result.message);
-          fetchUsersFromFirebase();
-        }
-      });
-  }
 
   const handleBarCodeScanned = ({ type, data }) => {
     setLoading(false);
@@ -91,7 +75,7 @@ const UsersScreen = ({ navigation }) => {
     }
   }
 
-  const fetchUsersFromFirebase = async () => {
+  async function fetchUsersFromFirebase() {
     const userAccessQuery = query(
       collection(db, "UserAccess"),
       where("ParentUser", "==", userID)
@@ -109,7 +93,7 @@ const UsersScreen = ({ navigation }) => {
     dispatch(setEmails(parents));
   };
 
-  const onLayoutHandler = () => {
+  function onLayoutHandler() {
     setLoading(false);
   };
 
@@ -124,6 +108,23 @@ const UsersScreen = ({ navigation }) => {
 
   function getJwtToken() {
     setJwtToken(auth?.currentUser?.uid);
+  }
+
+  function verifyUserId(apiKey, email) {
+    const apiUrl = "https://expensey-backend.onrender.com/verify";
+    const requestBody = JSON.stringify({ apiKey, email });
+
+    ApiFetcher.checkUserId(apiUrl, requestBody)
+      .then(result => {
+        if (result.statusCode == "200") {
+          console.log("success");
+          addUserAccess(result.message);
+          fetchUsersFromFirebase();
+        }
+        else {
+          console.log("failed veryfing user id");
+        }
+      });
   }
 
   return (
@@ -161,35 +162,33 @@ const UsersScreen = ({ navigation }) => {
 
 
       <View style={styles.Users.floatingFooter}>
+        <TouchableOpacity
+          style={styles.Users.floatingButtonWide}
+          onPress={async () => {
+            setLoading(true);
 
+            if (await getCameraPermission()) {
+              setIsScannerVisible(true);
+            }
+          }} // Navigate to QRCodeScreen
+        >
+          <Text style={styles.Users.wideButtonText}>Scan QR</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.Users.floatingButtonqr}
+          onPress={() => setIsvisible(true)}
+        >
+          <Text style={styles.Users.wideButtonText}>QR</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.Users.floatingButton}
+          onPress={() => navigation.navigate("ImagePicker")}
+        >
+          <Text style={styles.Users.buttonText}>+</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity
-        style={styles.Users.floatingButtonWide}
-        onPress={async () => {
-          setLoading(true);
-
-          if (await getCameraPermission()) {
-            setIsScannerVisible(true);
-          }
-        }} // Navigate to QRCodeScreen
-      >
-        <Text style={styles.Users.wideButtonText}>Scan QR</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.Users.floatingButtonqr}
-        onPress={() => setIsvisible(true)}
-      >
-        <Text style={styles.Users.wideButtonText}>QR</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.Users.floatingButton}
-        onPress={() => navigation.navigate("ImagePicker")}
-      >
-        <Text style={styles.Users.buttonText}>+</Text>
-      </TouchableOpacity>
 
       {isScannerVisible && (
         <View style={styles.Users.scannerContainer}>

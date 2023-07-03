@@ -4,27 +4,38 @@ import {
   Text,
   ScrollView,
   Image,
-  Dimensions,
-  StyleSheet,
   TouchableOpacity,
-  Button
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { selectImagesByEmail } from "../features/imagesSlice";
 import Modal from 'react-native-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import { collection, deleteDoc, doc, getDoc, getDocs, or, query, updateDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { setImages } from "../features/imagesSlice";
 import { removeEmail } from "../features/emailsSlice";
 import styles from "../styles";
-
-const windowWidth = Dimensions.get("window").width;
-const getTotalAmount = (images) => {
-  return images.reduce((total, image) => Math.round((total + image.amount) * 100) / 100, 0);
-};
+import ExpenseItem from "../components/ExpenseItem";
 
 const ImagesScreen = ({ route, navigation }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalImage, setModalImage] = useState([]);
+  const [fotterVisible, setFooterVisible] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]);
+
+  useEffect(() => {
+    if (fotterVisible) {
+      const timeout = setTimeout(() => {
+        setFooterVisible(false);
+      }, 4000);
+      return () => clearTimeout(timeout);
+    }
+  }, [fotterVisible]);
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
+
   const dispatch = useDispatch();
   const email = route.params.email;
 
@@ -71,12 +82,6 @@ const ImagesScreen = ({ route, navigation }) => {
 
 
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalImage, setModalImage] = useState([]);
-  const [fotterVisible, setFooterVisible] = useState([]);
-  const [selectedImages, setSelectedImages] = useState([]);
-  const [refresh, setRefresh] = useState(0);
-
   const handleLongPress = (image, month, index) => {
     if (selectedImages.some(selectedImage => selectedImage.url === image.url)) {
       setSelectedImages(selectedImages.filter(selectedImage => selectedImage.url !== image.url));
@@ -85,7 +90,7 @@ const ImagesScreen = ({ route, navigation }) => {
     }
   };
 
-  const handleMarkAsPaid = async () => {
+  async function handleMarkAsPaid() {
     try {
       for (let image of selectedImages) {
         const docRef = doc(db, "UserImages", image.Id); // Make sure `image.id` is the id of the document
@@ -101,7 +106,7 @@ const ImagesScreen = ({ route, navigation }) => {
     }
   };
 
-  const handleDelete = async () => {
+  async function handleDelete() {
     try {
       for (let image of selectedImages) {
         const docRef = doc(db, "UserImages", image.Id); // Make sure `image.id` is the id of the document
@@ -117,7 +122,7 @@ const ImagesScreen = ({ route, navigation }) => {
     }
   };
 
-  const handleMarkAsUnpaid = async () => {
+  async function handleMarkAsUnpaid() {
     try {
       for (let image of selectedImages) {
         const docRef = doc(db, "UserImages", image.Id); // Make sure `image.id` is the id of the document
@@ -133,7 +138,7 @@ const ImagesScreen = ({ route, navigation }) => {
     }
   };
 
-  const organizeData = (data) => {
+  function organizeData(data) {
     return data.reduce((acc, curr) => {
       const { Date, Amount, Email, ImageUrl, IsPaid, Id, IsDeleted } = curr;
       const amount = parseFloat(Amount);  // convert Amount to number
@@ -160,7 +165,7 @@ const ImagesScreen = ({ route, navigation }) => {
     }, {});
   };
 
-  const fetchUserImages = async () => {
+  async function fetchUserImages() {
     const userImagesCol = collection(db, 'UserImages');
     const userImagesSnapshot = await getDocs(userImagesCol);
     const userImages = userImagesSnapshot.docs.map(doc => ({ ...doc.data(), Id: doc.id }));
@@ -168,7 +173,7 @@ const ImagesScreen = ({ route, navigation }) => {
     return userImages;
   }
 
-  const fetchImages = async () => {
+  async function fetchImages() {
     try {
       fetchUserImages()
         .then(userImages => {
@@ -184,58 +189,23 @@ const ImagesScreen = ({ route, navigation }) => {
     }
   };
 
-  useEffect(() => {
-    if (fotterVisible) {
-      const timeout = setTimeout(() => {
-        setFooterVisible(false);
-      }, 4000);
-      return () => clearTimeout(timeout);
-    }
-  }, [fotterVisible]);
-
-  useEffect(() => {
-    fetchImages();
-  }, []);
-
   return (
     <View style={styles.Images.container}>
 
-      <ScrollView contentContainerStyle={styles.Images.scrollView} key={refresh}>
+      <ScrollView contentContainerStyle={styles.Images.scrollView}>
         {Object.entries(
           useSelector((state) => selectImagesByEmail(state, email))
         ).map(([month, images]) => (
-          <View key={month} style={styles.Images.monthContainer}>
-            <Text style={styles.Images.monthTitle}>
-              {month} - {getTotalAmount(images)} Лв.
-            </Text>
-            {images.map((image, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => handleLongPress(image, month, index)}
-                style={[
-                  styles.Images.imageRow,
-                  selectedImages.some(selectedImage => selectedImage.url === image.url)
-                    ? { backgroundColor: "darkgray" }
-                    : image.IsPaid === "paid"
-                      ? { backgroundColor: "rgba(56,209,0,0.6)" }
-                      : image.IsPaid === "unpaid"
-                        ? {}
-                        : {}
-                ]}
-              >
-                <TouchableOpacity
-                  onPress={() => {
-                    setFooterVisible(true);
-                    setModalImage([{ url: image.url }]);
-                    setModalVisible(true);
-                  }}
-                >
-                  <Image source={{ uri: image.url }} style={styles.Images.image} />
-                </TouchableOpacity>
-                <Text style={styles.Images.imageAmount}>{image.amount} Лв.</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <ExpenseItem
+            key={`${month}-${images.id}`} 
+            month={month}
+            images={images}
+            handleLongPress={handleLongPress}
+            selectedImages={selectedImages}
+            setFooterVisible={setFooterVisible}
+            setModalImage={setModalImage}
+            setModalVisible={setModalVisible}
+          />
         ))}
         <Modal
           transparent={true}

@@ -2,7 +2,6 @@ import { NavigationContainer, StackActions } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
-import HomeScreen from "./screens/HomeScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import { TailwindProvider } from "tailwindcss-react-native";
@@ -65,11 +64,6 @@ export default function App() {
             <Stack.Screen
               name="Register"
               component={RegisterScreen}
-              options={{ presentation: "fullScreenModal", headerShown: false }}
-            />
-            <Stack.Screen
-              name="Home"
-              component={HomeScreen}
               options={{ presentation: "fullScreenModal", headerShown: false }}
             />
             <Stack.Screen

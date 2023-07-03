@@ -15,8 +15,6 @@ const monthNames = ["January", "February", "March", "April", "May", "June",
 ];
 
 const ImagePickerScreen = ({ navigation }) => {
-    var nav = useNavigation();
-
     const [pickedImage, setPickedImage] = useState(null);
     const [date, setDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -31,7 +29,7 @@ const ImagePickerScreen = ({ navigation }) => {
             if (isUploading) {
                 const timer = setTimeout(() => {
                     setShowImage(true);
-                    nav.navigate("Users");
+                    navigation.navigate("Users");
                 }, 3000);
                 return () => clearTimeout(timer); // This will clear Timeout when component unmounts.
             } else {
@@ -40,26 +38,26 @@ const ImagePickerScreen = ({ navigation }) => {
         } catch (error) {
             console.log(error);
         }
-    }, [isUploading, nav]); // Ensure 'nav' is in your dependency array.
+    }, [isUploading, navigation]); // Ensure 'nav' is in your dependency array.
 
     // State for storing the entered number
     const [enteredNumber, setEnteredNumber] = useState(null);
 
-    const onChange = (event, selectedDate) => {
+    const onChangeExpenseDate = (event, selectedDate) => {
         const currentDate = selectedDate || date;
         setShowDatePicker(Platform.OS === 'ios');
         setDate(currentDate);
     };
 
-    const showModal = () => {
+    function showModal() {
         setModalVisible(true);
     };
 
-    const showPicker = () => {
+    function showPicker() {
         setShowDatePicker(true);
     };
 
-    const pickImage = async () => {
+    async function pickImage() {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
@@ -71,7 +69,7 @@ const ImagePickerScreen = ({ navigation }) => {
         }
     };
 
-    const addNewDocument = async (email, date, amount, imageUrl, isPaid) => {
+    async function addNewDocument(email, date, amount, imageUrl, isPaid) {
         const db = getFirestore();
 
         const newDocument = {
@@ -91,33 +89,14 @@ const ImagePickerScreen = ({ navigation }) => {
         }
     };
 
-    const getCurrentDate = (dateToFormat) => {
+    function getCurrentDate(dateToFormat) {
         const month = dateToFormat.getMonth() + 1; // getMonth() is zero-based
         const year = dateToFormat.getFullYear();
 
         return `${month < 10 ? '0' : ''}${month}/${year}`; // padding zero if month < 10
     };
 
-    const getTextFromImage = (imageUrl) => {
-        var myHeaders = new Headers();
-        myHeaders.append("apikey", "5oSPT6ti9JJg0OI5fnUpncoRyhP1faZS");
-
-        var requestOptions = {
-            method: 'GET',
-            redirect: 'follow',
-            headers: myHeaders
-        };
-
-        console.log(imageUrl);
-
-        fetch(imageUrl, requestOptions)
-            .then(response => response.text())
-            .then(result => console.log(result))
-            .catch(error => console.log('error', error));
-    }
-
-
-    const uploadImageToFirebase = async () => {
+    async function uploadImageToFirebase() {
         try {
 
             if (enteredNumber === null || pickedImage === null) {
@@ -149,7 +128,6 @@ const ImagePickerScreen = ({ navigation }) => {
             });
 
             var date2 = getCurrentDate(date);
-
             addNewDocument(auth?.currentUser.email, date2, enteredNumber, downloadURL, "none");
 
         } catch (error) {
@@ -157,7 +135,7 @@ const ImagePickerScreen = ({ navigation }) => {
         }
     };
 
-    const handleSubmit = () => {
+    function handleSubmit() {
         const inputNumber = parseFloat(textFieldValue);
         if (inputNumber <= 99.99) {
             setEnteredNumber(inputNumber.toFixed(2));
@@ -213,7 +191,7 @@ const ImagePickerScreen = ({ navigation }) => {
                             value={date}
                             mode="date"
                             display="default"
-                            onChange={onChange}
+                            onChange={onChangeExpenseDate}
                         />)}
 
 
