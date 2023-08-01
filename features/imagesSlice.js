@@ -19,7 +19,7 @@ export const selectImages = (state) => state.images.imagesByMonth;
 
 export const selectImagesByEmail = (state, email) => {
   const imagesByMonth = state.images.imagesByMonth;
-  const filteredImagesByMonth = {};
+  let filteredImagesByMonth = {};
 
   Object.keys(imagesByMonth).forEach((month) => {
     const filteredImages = imagesByMonth[month].filter(
@@ -31,6 +31,11 @@ export const selectImagesByEmail = (state, email) => {
     }
   });
 
+  // Convert the object to an array, sort it in descending order, and convert it back to an object
+  filteredImagesByMonth = Object.fromEntries(
+    Object.entries(filteredImagesByMonth)
+      .sort((a, b) => b[0].localeCompare(a[0]))
+  );
 
   return filteredImagesByMonth;
 };

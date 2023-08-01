@@ -35,43 +35,6 @@ const UsersScreen = ({ navigation }) => {
   const [existingUser, setUserExisting] = useState(false);
 
   useEffect(() => {
-    // Set the headerRight component
-    const headerRightComponent = () => (
-      <Text style={styles.Images.removeUserText}
-        onPress={async () => {
-
-          const userAccessQuery = query(
-            collection(db, "UserAccess"),
-            where("AccessUser", "==", email),
-            where("ParentUser", "==", auth?.currentUser?.email),
-          );
-
-          var doc1 = null;
-
-          //just in case there occurs a bug which added multiple identical emails
-          const querySnapshot = await getDocs(userAccessQuery);
-          querySnapshot.forEach(async (doc) => {
-            doc1 = doc;
-          });
-
-          var emailToRemove = doc1.data().AccessUser;
-
-          const docRef = doc(db, "UserAccess", doc1.id);
-          await deleteDoc(docRef);
-          dispatch(removeEmail(emailToRemove));
-          navigation.goBack();
-        }}>
-        Remove User
-      </Text>
-    );
-
-    // Set the options for the current screen
-    navigation.setOptions({
-      headerRight: headerRightComponent,
-    });
-  }, []);
-
-  useEffect(() => {
     navigation.setOptions({
       headerShown: !isScannerVisible,
     });
@@ -98,8 +61,7 @@ const UsersScreen = ({ navigation }) => {
     if (!emails.emails.includes(qrUserEmail) && userID !== qrUserEmail) {
       const userAccessCol = collection(db, "UserAccess");
 
-      // Set the "AccessUser" and "ParentUser" fields of the document
-      const docRef = await addDoc(userAccessCol, {
+      await addDoc(userAccessCol, {
         AccessUser: qrUserEmail,
         ParentUser: auth?.currentUser?.email
       });
@@ -170,7 +132,7 @@ const UsersScreen = ({ navigation }) => {
         style={[styles.Users.userContainer, { backgroundColor: 'lightgray', marginHorizontal: 10, marginTop: 20 }]}
         onPress={() => navigation.navigate("Images", { email: auth?.currentUser?.email, navigation })}
       >
-        <Text style={styles.Users.userEmail}>Show My Images</Text>
+        <Text style={styles.Users.userEmail}>Show My Expenses</Text>
       </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.Users.scrollView}>

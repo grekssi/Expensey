@@ -1,3 +1,4 @@
+import { alignProperty } from '@mui/material/styles/cssUtils';
 import { StyleSheet, Dimensions } from 'react-native';
 
 const windowWidth = Dimensions.get('window').width;
@@ -197,6 +198,17 @@ const ImagePicker = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5
     },
+    expenseTypeModalView: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 70,
+        marginHorizontal: 10,
+        backgroundColor: "transparent",
+        borderRadius: 20,
+        justifyContent: "flex-end", // Align the content (the modal) to the bottom.
+    },
     imageContainer: {
         alignSelf: 'center',
         height: windowHeight * 0.3,
@@ -250,6 +262,16 @@ const ImagePicker = StyleSheet.create({
     overlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    backgroundButton: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
     },
     modalView: {
         position: 'absolute',
@@ -368,6 +390,72 @@ const ImagePicker = StyleSheet.create({
         marginTop: 22,
         backgroundColor: "rgba(0,0,0,0.5)" // this is the grayed-out background
     },
+    wideButtonText: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#424242",
+    },
+    buttonText: {
+        fontSize: 36,
+        fontWeight: "bold",
+        color: "#424242",
+    },
+    floatingButtonWide: {
+        position: "absolute",
+        bottom: 7,
+        left: 10,
+        backgroundColor: "lightgray",
+        borderRadius: 5,
+        paddingHorizontal: 20,
+        height: 50,
+        alignItems: "center",
+        justifyContent: "center",
+        borderColor: "white",
+        borderWidth: 1,
+    },
+    floatingFooter: {
+        position: "absolute",
+        bottom: 0,
+        backgroundColor: "white",
+        width: windowWidth,
+        height: 70,
+        alignItems: "center",
+        justifyContent: "center",
+        shadowColor: "#000",
+        borderTopColor: "lightgray",
+        borderTopWidth: 1,
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 4.65,
+        elevation: 8,
+    },
+    floatingButtonqr: {
+        position: 'absolute',
+        bottom: 7,
+        right: 70,
+        paddingHorizontal: 20,
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'lightgray',
+        borderRadius: 5,
+        flexDirection: 'row',
+    },
+    floatingButton: {
+        position: 'absolute',
+        bottom: 7,
+        right: 10,
+        width: 50,
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'lightgray',
+        borderRadius: 5,
+        flexDirection: 'row',
+    },
 });
 
 const Login = StyleSheet.create({
@@ -480,16 +568,14 @@ const Users = StyleSheet.create({
         position: "absolute",
     },
     backgroundButton: {
-        position: "absolute",
+        position: 'absolute',
+        top: 0,
         bottom: 0,
         left: 0,
         right: 0,
-        top: 0,
-        backgroundColor: 'rgba(52, 52, 52, 0.5)',
-        paddingHorizontal: 20,
-        shadowOpacity: 0.3,
-        shadowRadius: 4.65,
-        elevation: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
     },
     scrollView: {
         flexGrow: 1,

@@ -4,8 +4,7 @@ import styles from '../styles';
 
 const ExpenseItem = ({ month, images, handleLongPress, selectedImages, setFooterVisible, setModalImage, setModalVisible }) => {
   const getTotalAmount = (images) => {
-    // Calculate the total amount logic here
-    // Return the total amount
+    return images.reduce((total, image) => total + image.amount, 0);
   };
 
   return (
